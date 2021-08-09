@@ -147,13 +147,17 @@
   <ItemGroup>
     <ClInclude Include="DB.h" />
     <ClInclude Include="DebugPrint.h" />
+    <ClInclude Include="LoginSystem.h" />
     <ClInclude Include="User.h" />
+    <ClInclude Include="UserLevelSystem.h" />
     <ClInclude Include="UserMgr.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DB.cpp" />
+    <ClCompile Include="LoginSystem.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="User.cpp" />
+    <ClCompile Include="UserLevelSystem.cpp" />
     <ClCompile Include="UserMgr.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
