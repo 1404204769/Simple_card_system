@@ -146,10 +146,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DB.h" />
+    <ClInclude Include="DebugPrint.h" />
+    <ClInclude Include="User.h" />
+    <ClInclude Include="UserMgr.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DB.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="User.cpp" />
+    <ClCompile Include="UserMgr.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
