@@ -1,9 +1,13 @@
 #include<iostream>
 #include "User.h"
 #include "UserMgr.h"
+#include "LoginSystem.h"
+#include "UserLevelSystem.h"
 using namespace std;
 CDB g_DB;
 CUserMgr g_UserMgr;
+CLoginSystem g_LoginSystem;
+CUserLevelSystem g_UserLevelSystem;
 const string strDB("test");
 const string strServer("localhost");
 const string strUser("root");
@@ -14,41 +18,23 @@ int main() {
 	string strInput = "";
 	g_DB.InitConnect(strDB, strServer, strUser, strPassword, nPort);
 	while (nchoice) {
-		cout << "请选择功能(1.登入 2.注销 3.升级)" << endl;
+		cout << "请选择功能(1.登入 2.注销 3.升级 4.显示所有在线玩家的信息)" << endl;
 		cin >> nchoice;
 		getchar();
 		switch (nchoice)
 		{
 		case 1: {
-			string strAccount="", strName = "";
-			cout << "请输入要登入的账号:";
-			getline(cin, strAccount);
-			if (!g_UserMgr.AddUser(strAccount)) {
-				cout << "登入失败" << endl;
-			}
-			else
-				cout << "登入成功" << endl;
+			g_LoginSystem.Login();
 		} break;
 		case 2: {
-			string strAccount = "";
-			cout << "请输入要注销的账户:";
-			getline(cin, strAccount);
-			g_UserMgr.ReduceUser(strAccount);
+			g_LoginSystem.Logout();
 		} break;
 		case 3: {
-			long long int i64Id;
-			cout << "请输入要升级的账号ID:";
-			cin >> i64Id;
-			CUser *pUser=g_UserMgr.getUser(i64Id);
-			if (!pUser) {
-				cout << "此账户不存在，请重新操作" << endl;
-				break;
-			}
-			cout << "请输入要升的等级:";
-			unsigned int unLev;
-			cin >> unLev;
-			pUser->setLev(pUser->getLev()+unLev);
+			g_UserLevelSystem.LevelUp();
 		} break;
+		case 4: {
+			g_UserMgr.PrintOnlineUser();
+		}break;
 		default:nchoice = 0;
 			break;
 		}
