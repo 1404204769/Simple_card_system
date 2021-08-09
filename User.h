@@ -9,7 +9,7 @@ extern CDB g_DB;
 class CUser
 {
 public:
-	CUser(const std::string& _strAccount = "wrong",const std::string& _strName = "wrong");
+	CUser(const std::string& _strAccount);
 	//CUser(const long long int _i64Id, const std::string& _strAccount, const std::string& _strTime, const std::string& _strName, const long long int _i64Exp, const unsigned int _unLev);
 	~CUser();/*当用户退出时调用此析构函数，并调用CDB::UpdateData函数将数据保存在数据库中*/
 	const std::string& getAccount();
@@ -32,7 +32,7 @@ private:
 	bool UpdateUser(CUser& pUser);/*在数据库中更新指定User*/
 	unsigned int m_unLev = 0;
 	long long int m_i64Id = 0, m_i64Exp = 0;
-	std::string m_strAccount = "wrong", m_strCreateTime = "now()", m_strName = "wrong";
+	std::string m_strAccount = "", m_strCreateTime = "now()", m_strName = "";
 };
 
 #endif //!_USER_H_

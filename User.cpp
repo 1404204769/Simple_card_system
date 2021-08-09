@@ -1,7 +1,6 @@
 #include "User.h"
 using namespace std;
-CUser::CUser(const std::string& _strAccount, const std::string& _strName ) {
-	m_strName = _strName;
+CUser::CUser(const std::string& _strAccount) {
 	m_strAccount = _strAccount;
 	stringstream strIn;
 	strIn << "调用了CUser构造函数\n";
