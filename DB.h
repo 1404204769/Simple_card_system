@@ -1,16 +1,18 @@
 #pragma once
 #ifndef _DB_H_
 #define _DB_H_
+#include "DebugPrint.h"
 #include <string>
 #include <iostream>
 #include <mysql++.h>
 #include <windows.h>
+#include <sstream>
 class CDB {
 public:
 	CDB();
 	~CDB();
 	bool InitConnect(const std::string& strDB, const std::string& strServer, const std::string& strUser, const std::string& strPassword, const int nPort);/*建立数据库连接*/
-	bool getQuery(mysqlpp::Query& query);/*获取一个基于当前连接的Query查询对象*/
+	mysqlpp::Query* getQuery();/*获取一个基于当前连接的Query查询对象*/
 	bool Insert(mysqlpp::Query& query);/*负责插入数据*/
 	bool Delete(mysqlpp::Query& query);/*负责删除数据*/
 	bool Update(mysqlpp::Query& query);/*负责更新数据*/
