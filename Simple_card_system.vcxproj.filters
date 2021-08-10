@@ -33,6 +33,21 @@
     <ClInclude Include="LoginSystem.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CardTypeMgr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CardType.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Card.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CardMgr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CardSystem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DB.cpp">
@@ -51,6 +66,21 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="LoginSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CardTypeMgr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CardType.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Card.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CardMgr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CardSystem.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -145,6 +145,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Card.h" />
+    <ClInclude Include="CardMgr.h" />
+    <ClInclude Include="CardSystem.h" />
+    <ClInclude Include="CardType.h" />
+    <ClInclude Include="CardTypeMgr.h" />
     <ClInclude Include="DB.h" />
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="LoginSystem.h" />
@@ -153,6 +158,11 @@
     <ClInclude Include="UserMgr.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Card.cpp" />
+    <ClCompile Include="CardMgr.cpp" />
+    <ClCompile Include="CardSystem.cpp" />
+    <ClCompile Include="CardType.cpp" />
+    <ClCompile Include="CardTypeMgr.cpp" />
     <ClCompile Include="DB.cpp" />
     <ClCompile Include="LoginSystem.cpp" />
     <ClCompile Include="main.cpp" />
