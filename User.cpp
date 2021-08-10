@@ -17,7 +17,10 @@ CUser::~CUser()
 		strIn << "用户数据保存失败\n";
 	else 
 		strIn << "用户数据保存成功\n";
+	delete m_pCardMgr;
+	m_pCardMgr = nullptr;
 	OutputDebugPrintf(strIn.str().c_str());
+
 	//cout << "用户数据保存："<< UpdateUser(*this)<< endl;
 }
 
@@ -81,7 +84,9 @@ const long long int CUser::getExp() {
 const unsigned int CUser::getLev() {
 	return m_unLev;
 }
-
+CCardMgr* CUser::getCardMgr() {
+	return m_pCardMgr;
+}
 void CUser::setLev(const unsigned int _unLev) {
 	m_unLev = _unLev;
 }
@@ -180,6 +185,12 @@ bool CUser::DeleteUser() {
 			return false;
 		}
 		strIn<< "从数据库删除用户成功\n";
+		if (!m_pCardMgr->DelAllCard()) {
+			strIn << "从数据库删除用户持有的卡牌失败\n";
+			OutputDebugPrintf(strIn.str().c_str());
+			return false;
+		}
+		strIn << "从数据库删除用户持有的卡牌成功\n";
 		OutputDebugPrintf(strIn.str().c_str());
 	}
 	catch (const mysqlpp::BadQuery& er) {
@@ -218,7 +229,7 @@ bool CUser::UpdateUser(CUser& user) {
 		if (!*pQuery) {
 			delete pQuery;
 			pQuery = nullptr;
-			strIn<<"User对象不存在，无法更新数据\n";
+			strIn<<"Query对象不存在，无法更新数据\n";
 			OutputDebugPrintf(strIn.str().c_str());
 			return false;
 		}
@@ -285,6 +296,11 @@ bool CUser::InitUser(mysqlpp::Row& row) {
 		m_i64Exp = row["exp"];
 		m_unLev = row["lev"];
 		m_i64Id = row["id"];
+		m_pCardMgr = new CCardMgr();
+		if (!m_pCardMgr->Init(m_i64Id)) {
+			cout << "用户拥有的卡牌加载失败" << endl;
+			return false;
+		}
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;

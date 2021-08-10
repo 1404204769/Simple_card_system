@@ -5,6 +5,7 @@
 #include <sstream>
 #include <mysql++.h>
 #include "DB.h"
+#include "CardMgr.h"
 extern CDB g_DB;
 class CUser
 {
@@ -18,6 +19,7 @@ public:
 	const long long int getId();
 	const long long int getExp();
 	const unsigned int getLev();
+	CCardMgr* getCardMgr();
 	void setLev(const unsigned int _unLev);
 	void setExp(const long long int _i64Exp);
 	void setName(const std::string& _strName);
@@ -33,6 +35,7 @@ private:
 	unsigned int m_unLev = 0;
 	long long int m_i64Id = 0, m_i64Exp = 0;
 	std::string m_strAccount = "", m_strCreateTime = "now()", m_strName = "";
+	CCardMgr* m_pCardMgr=nullptr;
 };
 
 #endif //!_USER_H_
