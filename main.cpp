@@ -61,10 +61,10 @@ bool Subject(int nchoice) {
 		string strUserAccount;
 		cout << "请输入指定玩家的账户" << endl;
 		getline(cin, strUserAccount);
-		cout << "请输入要删除的卡牌的名称" << endl;
-		string strCardName;
-		getline(cin, strCardName);
-		if (!g_CardSystem.DelUserCard(strUserAccount, strCardName))
+		cout << "请输入要删除的卡牌的Id" << endl;
+		long long int i64CardId;
+		cin >> i64CardId;
+		if (!g_CardSystem.DelUserCard(strUserAccount, i64CardId))
 			cout << "卡牌删除失败" << endl;
 		else
 			cout << "卡牌删除成功" << endl;
@@ -82,10 +82,10 @@ bool Subject(int nchoice) {
 		string strUserAccount;
 		cout << "请输入指定玩家的账户" << endl;
 		getline(cin, strUserAccount);
-		cout << "请输入要查询攻击力的卡牌的名称" << endl;
-		string strCardName;
-		getline(cin, strCardName);
-		if (!g_CardSystem.ShowUserCardAtk(strUserAccount, strCardName))
+		cout << "请输入要查询攻击力的卡牌的Id" << endl;
+		long long int i64CardId;
+		cin >> i64CardId;
+		if (!g_CardSystem.ShowUserCardAtk(strUserAccount, i64CardId))
 			cout << "查询玩家指定卡牌攻击力失败" << endl;
 		else
 			cout << "查询玩家指定卡牌攻击力成功" << endl;
