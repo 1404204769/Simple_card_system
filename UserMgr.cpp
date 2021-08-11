@@ -66,9 +66,19 @@ void CUserMgr::PrintOnlineUser() {
 		CUser* pUser = iterById->second;
 		iterById++;
 		if (!pUser) {
+			pUser = nullptr;
 			continue;
 		}
 		cout << "ID:" << pUser->getId() << "\tAccount:" << pUser->getAccount() << "\tLev:" << pUser->getLev()<<endl;
+		CCardMgr* pCardMgr = pUser->getCardMgr();
+		if (!pCardMgr) {
+			pUser = nullptr;
+			pCardMgr = nullptr;
+			continue;
+		}
+		pCardMgr->PrintAllCard();
+		pUser = nullptr;
+		pCardMgr = nullptr;
 	}
 }
 /*
