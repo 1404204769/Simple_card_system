@@ -3,10 +3,10 @@
 #define _CARDSYSTEM_H_
 #include <string>
 #include <sstream>
-#include "DebugPrint.h"
-#include "UserMgr.h"
-#include "CardTypeMgr.h"
 #include "CardMgr.h"
+#include "UserMgr.h"
+#include "DebugPrint.h"
+#include "CardTypeMgr.h"
 extern CUserMgr g_UserMgr;
 extern CCardTypeMgr g_CardTypeMgr;
 class CCardSystem
