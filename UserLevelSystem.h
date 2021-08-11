@@ -9,7 +9,6 @@ public:
 	CUserLevelSystem();
 	~CUserLevelSystem();
 	bool LevelUp();/*传入ID和要升的等级，直接在m_UserMgr的map内调用set函数修改数据*/
-private:
 };
 
 
