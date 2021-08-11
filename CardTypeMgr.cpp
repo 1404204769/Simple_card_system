@@ -49,7 +49,6 @@ bool CCardTypeMgr::Init() {
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());//打印在控制台
 			delete pQuery;
-			pQuery = nullptr;
 			return false;
 		}
 		*pQuery << "select * from s_card;";
@@ -57,7 +56,6 @@ bool CCardTypeMgr::Init() {
 		bool bRet = g_DB.Search(res, *pQuery);
 		strIn << "Query:" << pQuery->str() << "\n";
 		delete pQuery;
-		pQuery = nullptr;
 		if (!bRet) {
 			strIn << "从数据库加载卡牌池失败\n";
 			string strInput(strIn.str());
@@ -73,7 +71,6 @@ bool CCardTypeMgr::Init() {
 				string strInput(strIn.str());
 				OutputDebugPrintf(strInput.c_str());//打印在控制台
 				delete pCardType;
-				pCardType = nullptr;
 				return false;
 			}
 			if (!pCardType->Init(row)) {
@@ -81,11 +78,9 @@ bool CCardTypeMgr::Init() {
 				string strInput(strIn.str());
 				OutputDebugPrintf(strInput.c_str());//打印在控制台
 				delete pCardType;
-				pCardType = nullptr;
 				return false;
 			}
 			m_mapByType[pCardType->GetCardType()] = pCardType;
-			pCardType = nullptr;
 		}
 		string strInput(strIn.str());
 		OutputDebugPrintf(strInput.c_str());//打印在控制台
