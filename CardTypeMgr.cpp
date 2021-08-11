@@ -4,13 +4,15 @@ CCardTypeMgr::CCardTypeMgr() {
 	/*构造函数*/
 	stringstream strIn;
 	strIn << "调用了CCardTypeMgr构造函数\n";
-	OutputDebugPrintf(strIn.str().c_str());
+	string strInput(strIn.str());
+	OutputDebugPrintf(strInput.c_str());
 }
 CCardTypeMgr::~CCardTypeMgr() {
 	/*析构函数*/
 	stringstream strIn;
 	strIn << "调用了CCardTypeMgr析构函数\n";
-	OutputDebugPrintf(strIn.str().c_str());
+	string strInput(strIn.str());
+	OutputDebugPrintf(strInput.c_str());
 }
 const CCardType* CCardTypeMgr::GetCardTypeByType(unsigned int _unType) {
 	/*根据卡牌ID获取数据*/
@@ -31,7 +33,7 @@ void CCardTypeMgr::PrintAllCardType() {
 		if (!pCardType) {
 			continue;
 		}
-		cout << "ID:" << pCardType->getId() << "\tCardType:" << pCardType->getCardType() << "\tName:" << pCardType->getName()<<"\tHp:"<< pCardType->getHp()<< "\tMp:" << pCardType->getMp() << "\tAtk:" << pCardType->getAtk() << endl;
+		cout << "ID:" << pCardType->GetId() << "\tCardType:" << pCardType->GetCardType() << "\tName:" << pCardType->GetName()<<"\tHp:"<< pCardType->GetHp()<< "\tMp:" << pCardType->GetMp() << "\tAtk:" << pCardType->GetAtk() << endl;
 	}
 }
 bool CCardTypeMgr::Init() {
@@ -39,12 +41,13 @@ bool CCardTypeMgr::Init() {
 	try
 	{
 		mysqlpp::UseQueryResult res;
-		mysqlpp::Query* pQuery = g_DB.getQuery();
+		mysqlpp::Query* pQuery = g_DB.GetQuery();
 		stringstream strIn;
 		strIn << "CCardTypeMgr::Init()\n";
 		if (!*pQuery) {
 			strIn << "Query实例指针错误\n";
-			OutputDebugPrintf(strIn.str().c_str());//打印在控制台
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());//打印在控制台
 			delete pQuery;
 			pQuery = nullptr;
 			return false;
@@ -57,7 +60,8 @@ bool CCardTypeMgr::Init() {
 		pQuery = nullptr;
 		if (!bRet) {
 			strIn << "从数据库加载卡牌池失败\n";
-			OutputDebugPrintf(strIn.str().c_str());//打印在控制台
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());//打印在控制台
 			return false;
 		}
 		strIn << "从数据库加载卡牌池成功\n";
@@ -66,44 +70,52 @@ bool CCardTypeMgr::Init() {
 			CCardType* pCardType=new CCardType();
 			if (!pCardType) {
 				strIn << "卡牌类型实体化失败\n";
-				OutputDebugPrintf(strIn.str().c_str());//打印在控制台
+				string strInput(strIn.str());
+				OutputDebugPrintf(strInput.c_str());//打印在控制台
 				delete pCardType;
 				pCardType = nullptr;
 				return false;
 			}
 			if (!pCardType->Init(row)) {
 				strIn << "卡牌类型初始化失败\n";
-				OutputDebugPrintf(strIn.str().c_str());//打印在控制台
+				string strInput(strIn.str());
+				OutputDebugPrintf(strInput.c_str());//打印在控制台
 				delete pCardType;
 				pCardType = nullptr;
 				return false;
 			}
-			m_mapByType[pCardType->getCardType()] = pCardType;
+			m_mapByType[pCardType->GetCardType()] = pCardType;
+			pCardType = nullptr;
 		}
-		OutputDebugPrintf(strIn.str().c_str());//打印在控制台
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());//打印在控制台
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn << "CCardTypeMgr::Init()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CCardTypeMgr::Init()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadIndex& er) {
 		stringstream strIn;
 		strIn << "CCardTypeMgr::Init()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn << "CCardTypeMgr::Init()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
