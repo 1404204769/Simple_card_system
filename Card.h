@@ -16,19 +16,19 @@ public:
 	std::string& GetName();/*获取m_strName*/
 	unsigned int GetLev();/*获取m_unLev*/
 	unsigned int GetCardType();/*获取m_unCardType*/
-	unsigned int GetMark();/*获取m_unMark*/
+	bool GetMark();/*获取m_unMark*/
 	long long int GetCardId();/*获取m_i64CardId*/
 	long long int GetUserId();/*获取m_i64UserId*/
 	long long int GetExp();/*获取m_i64Exp*/
-	bool SetMark(unsigned int _unMark);/*设置栈状态 1.增 2.删 3.改 4.无变化*/
+	void SetMark(bool _bMark);/*设置栈状态 1.增 2.删 3.改 4.无变化*/
 	const CCardType* GetCardTypeData();/*获取对应的卡牌类型详细数据*/
-
+	
 private:
-	bool Insert();/*将Card数据插入数据库*/
-	bool Delete();/*将Card数据从数据库删除*/
+
 	bool Update();/*更新数据库*/
-	unsigned int  m_unCardType = 0, m_unLev = 0,m_unMark=0;
-	std::string m_strName = "";
+	unsigned int  m_unCardType = 0, m_unLev = 0;
+	bool m_bMark = false;/*false表示未更改，true表示已经变化*/
+	std::string m_strName = "";   
 	long long int m_i64CardId = 0, m_i64UserId = 0, m_i64Exp = 0;
 	const CCardType* m_pCardType = nullptr;
 };
