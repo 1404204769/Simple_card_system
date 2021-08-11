@@ -73,7 +73,6 @@ bool CUser::InsertUser() {
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
 			delete pQuery;
-			pQuery = nullptr;
 			return false;
 		}
 		*pQuery << "insert into d_user(account,name) values(%0q:account, %1q:name)";
@@ -83,7 +82,6 @@ bool CUser::InsertUser() {
 		bool bRet = g_DB.Insert(*pQuery);
 		strIn<<"Query:" << pQuery->str() << "\n";
 		delete pQuery;
-		pQuery = nullptr;
 		if (!bRet) {
 			//cout << "往数据库插入新用户失败" << endl;
 			strIn<<"往数据库插入新用户失败\n";
@@ -138,7 +136,6 @@ bool CUser::DeleteUser() {
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
 			delete pQuery;
-			pQuery = nullptr;
 			return false;
 		}
 		*pQuery << "delete from d_user where account = %0q:account;";
@@ -147,7 +144,6 @@ bool CUser::DeleteUser() {
 		bool bRet = g_DB.Delete(*pQuery);
 		strIn<< "Query:" << pQuery->str() << "\n";
 		delete pQuery;
-		pQuery = nullptr;
 		if (!bRet) {
 			strIn<<"从数据库删除用户失败\n";
 			string strInput(strIn.str());
@@ -204,7 +200,6 @@ bool CUser::UpdateUser(CUser& user) {
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
 		if (!*pQuery) {
 			delete pQuery;
-			pQuery = nullptr;
 			strIn<<"Query对象不存在，无法更新数据\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
@@ -220,7 +215,6 @@ bool CUser::UpdateUser(CUser& user) {
 		strIn<< "Query:" << pQuery->str()<<"\n";
 		bool bRet = g_DB.Update(*pQuery);
 		delete pQuery;
-		pQuery = nullptr;
 		if (!bRet) {
 			//cout << "向数据库更新用户失败" << endl;
 			strIn<<"向数据库更新用户失败\n";
