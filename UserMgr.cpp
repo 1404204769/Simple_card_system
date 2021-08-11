@@ -75,7 +75,7 @@ void CUserMgr::PrintOnlineUser() {
 			pUser = nullptr;
 			continue;
 		}
-		cout << "ID:" << pUser->GetId() << "\tAccount:" << pUser->GetAccount() << "\tLev:" << pUser->GetLev()<<endl;
+		cout << "ID:" << pUser->GetId() << "\tAccount:" << pUser->GetAccount() << "\tName:" << pUser->GetName() << "\tLev:" << pUser->GetLev()<<endl;
 		CCardMgr* pCardMgr = pUser->GetCardMgr();
 		if (!pCardMgr) {
 			pUser = nullptr;
@@ -113,12 +113,12 @@ bool CUserMgr::AddUser(mysqlpp::Row& row) {
 	}
 	m_mapByAccount[pUser->GetAccount()] = pUser->GetId();
 	m_mapById[pUser->GetId()] = pUser;
-	pUser = nullptr;
 	if (m_mapByAccount.count(pUser->GetAccount()) == 0 || m_mapById.count(pUser->GetId()) == 0) {
 		cout << "用户登入未生效" << endl;
 		DelUser(pUser->GetAccount());
 		return false;
 	}
+	pUser = nullptr;
 	return true;
 }
 
@@ -205,6 +205,10 @@ bool CUserMgr::SearchUser(mysqlpp::Row& row, const std::string& _strAccount) {
 bool CUserMgr::GenerateUser(const string& _strAccount) {
 	/*参数为account，name,调用CUser的InsertUser*/
 	CUser user(_strAccount);
+	string strName;
+	cout << "请输入昵称" << endl;
+	getline(cin, strName);
+	user.SetName(strName);
 	if (!user.InsertUser()) {
 		cout << "用户注册失败" << endl;
 		return false;
