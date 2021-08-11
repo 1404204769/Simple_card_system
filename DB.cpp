@@ -4,12 +4,10 @@ using namespace mysqlpp;
 
 CDB::CDB() :m_Conn(true), m_strDB(""), m_strServer(""), m_strUser(""), m_strPassword(""), m_nPort(0)
 {
-	//cout << "调用了CDB的构造函数" << endl;
 	OutputDebugPrintf("调用了CDB的构造函数");
 }
 CDB::~CDB()
 {
-	//cout << "调用了CDB的析构函数" << endl;
 	OutputDebugPrintf("调用了CDB的析构函数");
 }
 bool CDB::InitConnect(const string& strDB, const string& strServer, const string& strUser, const string& strPassword, const int nPort) {
@@ -35,26 +33,33 @@ bool CDB::InitConnect(const string& strDB, const string& strServer, const string
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn <<  "CDB::InitConnect()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CDB::InitConnect()\nConversion error: "<< er.what()<< "\ntretrieved data size: "<< er.retrieved << ", actual size: " << er.actual_size<<"\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn<<"CDB::InitConnect()\nError: "<< er.what()<< "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
 }
-mysqlpp::Query* CDB::getQuery() {
+mysqlpp::Query* CDB::GetQuery() {
 	try {
 		Query* pQuery = new Query(m_Conn.query());
+		if (!pQuery) {
+			OutputDebugPrintf("调用CDB::getQuery()获取Query失败");
+			return nullptr;
+		}
 		OutputDebugPrintf("调用CDB::getQuery()获取Query成功");
 		return pQuery;
 	}
@@ -62,18 +67,21 @@ mysqlpp::Query* CDB::getQuery() {
 		// Handle any query errors
 		stringstream strIn;
 		strIn<< "CDB::getQuery()\nQuery error: "<< er.what()<< "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		// Handle bad conversions
 		stringstream strIn;
 		strIn <<  "CDB::getQuery()\nConversion error: "<< er.what()<< "\ntretrieved data size: "<< er.retrieved << ", actual size: " << er.actual_size<< "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn <<  "CDB::getQuery()\nError: "<< er.what()<< "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	return nullptr;
 }
@@ -93,28 +101,33 @@ bool CDB::Insert(mysqlpp::Query&query) {
 		strIn <<"CDB::Insert()->";
 		if (query.affected_rows() == 0) {
 			strIn<< "插入失败，数据库被改变" << i64Num<<"条\n";
-			OutputDebugPrintf(strIn.str().c_str());
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
 			return false;
 		}
 		strIn<<"插入成功，数据库被改变" <<i64Num<<"条\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn << "CDB::Insert()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CDB::Insert()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn << "CDB::Insert()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
@@ -135,28 +148,33 @@ bool CDB::Delete(mysqlpp::Query& query) {
 		strIn<< "CDB::Delete()->";
 		if (query.affected_rows() == 0) {
 			strIn<<"删除失败，数据库被改变" << i64Num<< "条\n";
-			OutputDebugPrintf(strIn.str().c_str());
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
 			return false;
 		}
 		strIn<< "删除成功，数据库被改变" << i64Num<< "条\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn << "CDB::Delete()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CDB::Delete()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn << "CDB::Delete()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
@@ -175,24 +193,28 @@ bool CDB::Update(mysqlpp::Query& query) {
 		long long int i64Num = query.affected_rows();
 		stringstream strIn;
 		strIn<<"CDB::Delete()-> 更新成功，数据库被改变" + query.affected_rows()<<"条\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn << "CDB::Update()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CDB::Update()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn << "CDB::Update()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
@@ -214,19 +236,22 @@ bool CDB::Search(UseQueryResult& res, mysqlpp::Query& query) {
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn << "CDB::Search()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CDB::Search()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn << "CDB::Search()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
