@@ -29,7 +29,6 @@ bool CCardMgr::Init(long long int _i64UserId) {
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());//打印在控制台
 			delete pQuery;
-			pQuery = nullptr;
 			return false;
 		}
 		*pQuery << "select * from d_card where user_id = %0q:UserId;";
@@ -41,11 +40,9 @@ bool CCardMgr::Init(long long int _i64UserId) {
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());//打印在控制台
 			delete pQuery;
-			pQuery = nullptr;
 			return false;
 		}
 		delete pQuery;
-		pQuery = nullptr;
 		strIn << "从数据库查询用户卡牌数据成功\n";
 		while (row = res.fetch_row()) {
 			CCard* pCard = new CCard();
@@ -54,31 +51,24 @@ bool CCardMgr::Init(long long int _i64UserId) {
 				string strInput(strIn.str());
 				OutputDebugPrintf(strInput.c_str());//打印在控制台
 				delete pCard;
-				pCard = nullptr;
 				return false;
 			}
 			const CCardType* pCardType = g_CardTypeMgr.GetCardTypeByType(row["card_type"]);
 			if (!pCardType) {
 				cout << "用户所持有的卡牌类型非法,不予显示" << endl;
-				pCardType = nullptr;
 				delete pCard;
-				pCard = nullptr;
 				continue;
 			}
 			if (!pCard->Init(row["id"], row["user_id"], row["card_type"], string(row["name"]), row["exp"], row["lev"], pCardType)) {
 				strIn << "卡牌类型初始化失败\n";
 				string strInput(strIn.str());
 				OutputDebugPrintf(strInput.c_str());//打印在控制台
-				pCardType = nullptr;
 				delete pCard;
-				pCard = nullptr;
 				return false;
 			}
-			pCard->SetMark(4);
-			m_mapByCardName[pCard->GetName()] = pCard;
-			pCardType = nullptr;
-			pCard = nullptr;
+			m_mapByCardId[pCard->GetCardId()] = pCard;
 		}
+		m_vecDel.clear();
 		string strInput(strIn.str());
 		OutputDebugPrintf(strInput.c_str());//打印在控制台
 	}
@@ -112,53 +102,31 @@ bool CCardMgr::Init(long long int _i64UserId) {
 	}
 	return true;
 }
-CCard* CCardMgr::GetCardByCardName(std::string& _strName) {
+CCard* CCardMgr::GetCardByCardId(long long int _i64CardId) {
 	/*根据卡牌名称获取卡牌数据*/
-	MapByCardNameIter iterByName = m_mapByCardName.find(_strName);
-	if (iterByName == m_mapByCardName.end()) {
-		cout << "Do not Find CardName:" << _strName << endl;
+	MapByCardIdIter iterByName = m_mapByCardId.find(_i64CardId);
+	if (iterByName == m_mapByCardId.end()) {
+		cout << "Do not Find CardId:" << _i64CardId << endl;
 		return nullptr;
 	}
-	CCard* pCard= iterByName->second;
-	if (!pCard) {
-		pCard = nullptr;
-		return nullptr;
-	} 
-	if (pCard->GetMark() == 2) {
-		cout << "无法获取此卡牌的信息，可能是名字出错或者卡牌正在删除中" << endl;
-		delete iterByName->second;
-		iterByName->second = nullptr;
-		m_mapByCardName.erase(iterByName);
-		pCard = nullptr;
-		return nullptr;
-	}
-	return pCard;
+	return iterByName->second;
 }
 void CCardMgr::PrintAllCard() {
 	/*打印显示拥有的所有卡牌的数据*/
-	MapByCardNameIter iterByName = m_mapByCardName.begin();
-	while (iterByName != m_mapByCardName.end()) {
-		CCard* pCard = iterByName->second;
-		iterByName++;
+	MapByCardIdIter iterById = m_mapByCardId.begin();
+	while (iterById != m_mapByCardId.end()) {
+		CCard* pCard = iterById->second;
+		iterById++;
 		if (!pCard) {
 			continue;
 		}
-		if (pCard->GetMark() == 2) {
-			//说明此时已经被删除
-			pCard = nullptr;
-			continue;
-		}
 		cout << "CardID:" << pCard->GetCardId() << "\tUserId:" << pCard->GetUserId() << "\tCardType:" << pCard->GetCardType() << "\tName:" << pCard->GetName() << "\tExp:" << pCard->GetExp() << "\tLev:" << pCard->GetLev() <<"\tMark:"<<pCard->GetMark() << endl;
-		const CCardType* pCardType = g_CardTypeMgr.GetCardTypeByType(pCard->GetCardType());
+		const CCardType* pCardType = pCard->GetCardTypeData();
 		if (!pCardType) {
 			cout << "无法获取对应类型" << endl;
-			pCardType = nullptr;
-			pCard = nullptr;
 			continue;
 		}
-		cout << "(ID:" << pCardType->GetId() << "\tCardTypeId:" << pCardType->GetCardType() << "\tCardName:" << pCardType->GetName() << "\tHp:" << pCardType->GetHp() << "\tMp:" << pCardType->GetMp() << "\tAtk:" << pCardType->GetAtk() <<")" << endl;
-		pCardType = nullptr;
-		pCard = nullptr;
+		cout << "\t(ID:" << pCardType->GetId() << "\tCardTypeId:" << pCardType->GetCardType() << "\tCardName:" << pCardType->GetName() << "\tHp:" << pCardType->GetHp() << "\tMp:" << pCardType->GetMp() << "\tAtk:" << pCardType->GetAtk() <<")" << endl;
 	}
 }
 bool CCardMgr::AddCard(long long int _i64UserId, const CCardType* _pCardType) {
@@ -170,67 +138,207 @@ bool CCardMgr::AddCard(long long int _i64UserId, const CCardType* _pCardType) {
 	CCard* pCard = new CCard();
 	if (!pCard) {
 		delete pCard;
-		pCard = nullptr;
 		cout << "Card实体化失败" << endl;
 		return false;
 	}
-	string strName;
-	cout << "请输入卡牌的昵称(注意：不能与已有卡牌重名)" << endl;
-	getline(cin, strName);
-	while (GetCardByCardName(strName)) {
-		cout << "卡牌名称()已存在，请重新输入卡牌的昵称(注意：不能与已有卡牌重名，不能含有空格)" << endl;
-		getline(cin, strName);
+	long long int i64CardId = 0;
+	if (!Insert(i64CardId, _i64UserId, _pCardType->GetCardType(), "", 0, 1)) {
+		cout << "用户新增卡牌插入数据库失败" << endl;
+		return false;
 	}
-	if (!pCard->Init(0, _i64UserId, _pCardType->GetCardType(), strName, 0, 1, _pCardType)) {
+	if (!pCard->Init(i64CardId, _i64UserId, _pCardType->GetCardType(), "", 0, 1,_pCardType)) {
 		cout << "卡牌数据初始化失败，增加卡牌失败" << endl;
 		delete pCard;
-		pCard = nullptr;
 		return false;
 	}
-	if (!pCard->SetMark(1)) {/*标记当前数据是新增的*/
-		delete pCard;
-		pCard = nullptr;
-		return false;
-	}
-	m_mapByCardName[pCard->GetName()] = pCard;
-	pCard = nullptr;
+	m_mapByCardId[pCard->GetCardId()] = pCard;
 	return true;
 }
-bool CCardMgr::DelCardByName(std::string& _strName) {
+bool CCardMgr::DelCardById(long long int _i64CardId) {
 	/*根据玩家卡牌名称来删除数据*/
-	CCard* pCard = GetCardByCardName(_strName);
+	CCard* pCard = m_mapByCardId[_i64CardId];
+	m_mapByCardId.erase(_i64CardId);
 	if (!pCard) {
-		cout << "删除失败，该玩家没有这张叫做（"<<_strName<<"）的卡牌" << endl;
+		cout << "删除失败，该玩家没有这张叫做（"<<_i64CardId<<"）的卡牌" << endl;
 		return false;
 	}
-	if (!pCard->SetMark(2))
-		return false;
+	m_vecDel.push_back(pCard);
 	return true;
 }
 bool CCardMgr::DelAllCard() {
 	/*删除所有的卡牌*/
 	bool bRet = true;
-	MapByCardNameIter iterByName = m_mapByCardName.begin();
-	while (iterByName != m_mapByCardName.end()) {
+	MapByCardIdIter iterByName = m_mapByCardId.begin();
+	while (iterByName != m_mapByCardId.end()) {
 		CCard* pCard = iterByName->second;
+		m_vecDel.push_back(pCard);
 		iterByName++;
 		if (!pCard) {
 			bRet = false;
 			continue;
 		}
-		if (!pCard->SetMark(2)) {
-			return false;
-		}
 	}
+	m_mapByCardId.clear();
 	return bRet;
 }
 void CCardMgr::Free() {
 	/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
-	MapByCardNameIter iterByName = m_mapByCardName.begin();
-	while (iterByName != m_mapByCardName.end()) {
+	MapByCardIdIter iterByName = m_mapByCardId.begin();
+	while (iterByName != m_mapByCardId.end()) {
 		delete iterByName->second;//先释放内存
 		iterByName->second = nullptr;//置空
 		iterByName++;
 	}
-	m_mapByCardName.clear();
+	m_mapByCardId.clear();
+	vector<CCard*>::iterator VecIter = m_vecDel.begin();
+	while (VecIter != m_vecDel.end()) {
+		CCard* pCard = *VecIter++;
+		if(!pCard)
+			continue;
+		Delete(*pCard);
+	}
+	m_vecDel.clear();
+}
+
+
+/*数据库相关接口*/
+bool CCardMgr::Insert(long long int& _i64CardId, const long long int _i64UserId, const unsigned int _unCardType, const std::string& _strName, const long long int _i64Exp, const unsigned int _unLev){
+	/*将Card数据插入数据库*/
+	/*在数据库中插入新的User数据*/
+	try
+	{
+		stringstream strIn;
+		strIn << "CCard::Insert()\n";
+		mysqlpp::Query* pQuery = g_DB.GetQuery();
+		if (!*pQuery) {
+			strIn << "Query实例指针错误\n";
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
+			delete pQuery;
+			return false;
+		}
+		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev)";
+		pQuery->parse();
+		pQuery->template_defaults["user_id"] = _i64UserId;
+		pQuery->template_defaults["card_type"] = _unCardType;
+		pQuery->template_defaults["name"] = _strName.c_str();
+		pQuery->template_defaults["exp"] = _i64Exp;
+		pQuery->template_defaults["lev"] = _unLev;
+		bool bRet = g_DB.Insert(*pQuery);
+		strIn << "Query:" << pQuery->str() << "\n";
+		if (!bRet) {
+			strIn << "往数据库插入用户新卡牌数据失败\n";
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
+			return false;
+		}
+		strIn << "往数据库插入用户新卡牌数据成功\n";
+		pQuery->reset();
+		*pQuery << "select @@IDENTITY as ID";
+		pQuery->parse();
+		mysqlpp::UseQueryResult res;
+		if (!g_DB.Search(res, *pQuery)) {
+			cout << "获取系统分配的CardId失败" << endl;
+			delete pQuery;
+			return false;
+		}
+		delete pQuery;
+		mysqlpp::Row row=res.fetch_row();
+		if (!row) {
+			cout << "没有获取到系统分配的CardId" << endl;
+			return false;
+		}
+		_i64CardId = row["ID"];
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+	}
+	catch (const mysqlpp::BadQuery& er) {
+		stringstream strIn;
+		strIn << "CCard::Insert()\nQuery error: " << er.what() << "\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+		return false;
+	}
+	catch (const mysqlpp::BadConversion& er) {
+		stringstream strIn;
+		strIn << "CCard::Insert()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+		return false;
+	}
+	catch (const mysqlpp::BadIndex& er) {
+		stringstream strIn;
+		strIn << "CCard::Insert()\nError: " << er.what() << "\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+		return false;
+	}
+	catch (const mysqlpp::Exception& er) {
+		stringstream strIn;
+		strIn << "CCard::Insert()\nError: " << er.what() << "\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+		return false;
+	}
+	return true;
+}
+bool CCardMgr::Delete(CCard& Card) {
+	/*将Card数据从数据库删除*/
+	try
+	{
+		stringstream strIn;
+		strIn << "CCard::Delete()\n";
+		mysqlpp::Query* pQuery = g_DB.GetQuery();
+		if (!*pQuery) {
+			strIn << "Query实例指针错误\n";
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
+			delete pQuery;
+			return false;
+		}
+		*pQuery << "delete from d_card where id = %0q:CardId;";
+		pQuery->parse();
+		pQuery->template_defaults["CardId"] = Card.GetCardId();
+		bool bRet = g_DB.Delete(*pQuery);
+		strIn << "Query:" << pQuery->str() << "\n";
+		delete pQuery;
+		if (!bRet) {
+			strIn << "从数据库删除用户卡牌数据失败\n";
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
+			return false;
+		}
+		strIn << "从数据库删除用户卡牌数据成功\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+	}
+	catch (const mysqlpp::BadQuery& er) {
+		stringstream strIn;
+		strIn << "CCard::Delete()\nQuery error: " << er.what() << "\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+		return false;
+	}
+	catch (const mysqlpp::BadConversion& er) {
+		stringstream strIn;
+		strIn << "CCard::Delete()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+		return false;
+	}
+	catch (const mysqlpp::BadIndex& er) {
+		stringstream strIn;
+		strIn << "CCard::Delete()\nError: " << er.what() << "\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+		return false;
+	}
+	catch (const mysqlpp::Exception& er) {
+		stringstream strIn;
+		strIn << "CCard::Delete()\nError: " << er.what() << "\n";
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
+		return false;
+	}
+	return true;
 }
