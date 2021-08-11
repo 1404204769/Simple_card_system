@@ -16,8 +16,8 @@ public://内部的逻辑函数
 	*/
 	bool AddUser(mysqlpp::Row& row);/*负责管理Map容器的增加*/
 	bool DelUser(const std::string& _strAccount);/*负责管理Map容器的删除*/
-	CUser* getUser(const long long int _i64Id);/*从map里面查询，返回查询对象指针*/
-	long long int getOnlineUserId(const std::string& _strAccount);/*根据账户返回ID*//*如果返回一个负数说明该用户不在线*/
+	CUser* GetUser(const long long int _i64Id);/*从map里面查询，返回查询对象指针*/
+	long long int GetOnlineUserId(const std::string& _strAccount);/*根据账户返回ID*//*如果返回一个负数说明该用户不在线*/
 	void PrintOnlineUser();/*打印显示所有在线玩家的信息*/
 	bool CheckExistInDB(mysqlpp::Row& row, const std::string& _strAccount);/*检查用户是否存在于数据库*/
 private:
