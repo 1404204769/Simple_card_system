@@ -11,18 +11,17 @@ class CUser
 {
 public:
 	CUser(const std::string& _strAccount);
-	//CUser(const long long int _i64Id, const std::string& _strAccount, const std::string& _strTime, const std::string& _strName, const long long int _i64Exp, const unsigned int _unLev);
 	~CUser();/*当用户退出时调用此析构函数，并调用CDB::UpdateData函数将数据保存在数据库中*/
-	const std::string& getAccount();
-	const std::string& getCreateTime();
-	const std::string& getName();
-	const long long int getId();
-	const long long int getExp();
-	const unsigned int getLev();
-	CCardMgr* getCardMgr();
-	void setLev(const unsigned int _unLev);
-	void setExp(const long long int _i64Exp);
-	void setName(const std::string& _strName);
+	const std::string& GetAccount();
+	const std::string& GetCreateTime();
+	const std::string& GetName();
+	const long long int GetId();
+	const long long int GetExp();
+	const unsigned int GetLev();
+	CCardMgr* GetCardMgr();
+	void SetLev(const unsigned int _unLev);
+	void SetExp(const long long int _i64Exp);
+	void SetName(const std::string& _strName);
 	/*
 	* 以下是数据库层相关接口
 	*/
