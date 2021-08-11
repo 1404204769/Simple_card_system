@@ -72,19 +72,14 @@ void CUserMgr::PrintOnlineUser() {
 		CUser* pUser = iterById->second;
 		iterById++;
 		if (!pUser) {
-			pUser = nullptr;
 			continue;
 		}
 		cout << "ID:" << pUser->GetId() << "\tAccount:" << pUser->GetAccount() << "\tName:" << pUser->GetName() << "\tLev:" << pUser->GetLev()<<endl;
 		CCardMgr* pCardMgr = pUser->GetCardMgr();
 		if (!pCardMgr) {
-			pUser = nullptr;
-			pCardMgr = nullptr;
 			continue;
 		}
 		pCardMgr->PrintAllCard();
-		pUser = nullptr;
-		pCardMgr = nullptr;
 	}
 }
 /*
@@ -96,19 +91,16 @@ bool CUserMgr::AddUser(mysqlpp::Row& row) {
 	if (!pUser) {
 		cout << "创建用户实体失败" << endl;
 		delete pUser;
-		pUser = nullptr;
 		return false;
 	}
 	if (!row) {
 		cout << "错误：没有获取到数据库中的数据返回的Row" << endl;
 		delete pUser;
-		pUser = nullptr;
 		return false;
 	}
 	if (!pUser->InitUser(row)) {
 		cout << "用户初始化失败" << endl;
 		delete pUser;
-		pUser = nullptr;
 		return false;
 	}
 	m_mapByAccount[pUser->GetAccount()] = pUser->GetId();
@@ -118,7 +110,6 @@ bool CUserMgr::AddUser(mysqlpp::Row& row) {
 		DelUser(pUser->GetAccount());
 		return false;
 	}
-	pUser = nullptr;
 	return true;
 }
 
@@ -147,7 +138,6 @@ bool CUserMgr::SearchUser(mysqlpp::Row& row, const std::string& _strAccount) {
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());//打印在控制台
 			delete pQuery;
-			pQuery = nullptr;
 			return false;
 		}
 		*pQuery << "select * from d_user where account = %0q:value;";
@@ -156,7 +146,6 @@ bool CUserMgr::SearchUser(mysqlpp::Row& row, const std::string& _strAccount) {
 		bool bRet = g_DB.Search(res, *pQuery);
 		strIn << "Query:" << pQuery->str() << "\n";
 		delete pQuery;
-		pQuery = nullptr;
 		if (!bRet) {
 			strIn << "从数据库查询用户失败\n";
 			string strInput(strIn.str());
