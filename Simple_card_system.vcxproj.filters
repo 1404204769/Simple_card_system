@@ -19,9 +19,6 @@
     <Filter Include="源文件\业务层">
       <UniqueIdentifier>{99069dea-d191-4d6d-8ee8-c590cafe14ec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\数据管理层">
-      <UniqueIdentifier>{d918c8ec-813c-4ba5-82a4-bcdbdce98c27}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\数据层">
       <UniqueIdentifier>{c862643d-9207-4485-a33a-dcd4e2eeb679}</UniqueIdentifier>
     </Filter>
@@ -30,6 +27,9 @@
     </Filter>
     <Filter Include="源文件\数据管理层">
       <UniqueIdentifier>{b317aed8-e897-454d-b7f7-1368c54d8e41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\数据管理层">
+      <UniqueIdentifier>{d918c8ec-813c-4ba5-82a4-bcdbdce98c27}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
