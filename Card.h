@@ -20,7 +20,7 @@ public:
 	long long int GetCardId();/*获取m_i64CardId*/
 	long long int GetUserId();/*获取m_i64UserId*/
 	long long int GetExp();/*获取m_i64Exp*/
-	void SetMark(unsigned int _unMark);/*设置栈状态 1.增 2.删 3.改 4.无变化*/
+	bool SetMark(unsigned int _unMark);/*设置栈状态 1.增 2.删 3.改 4.无变化*/
 	const CCardType* GetCardTypeData();/*获取对应的卡牌类型详细数据*/
 
 private:

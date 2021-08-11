@@ -4,13 +4,15 @@ CCard::CCard() {
 	/*构造函数*/
 	stringstream strIn;
 	strIn << "调用了CCard构造函数\n";
-	OutputDebugPrintf(strIn.str().c_str());
+	string strInput(strIn.str());
+	OutputDebugPrintf(strInput.c_str());
 }
 CCard::~CCard(){
 	/*析构函数*/
 	stringstream strIn;
 	strIn << "调用了CCard析构函数\n";
-	OutputDebugPrintf(strIn.str().c_str());
+	string strInput(strIn.str());
+	OutputDebugPrintf(strInput.c_str());
 	if (m_unMark == 1) {
 		Insert();
 	}
@@ -67,9 +69,27 @@ const CCardType* CCard::GetCardTypeData() {
 	/*获取对应的卡牌类型详细数据*/
 	return m_pCardType;
 }
-void CCard::SetMark(unsigned int _unMark) {
+bool CCard::SetMark(unsigned int _unMark) {
 	/*设置栈状态*/
+	if (_unMark > 4 || _unMark < 0)return false;
+	if (m_unMark==0) {//说明目前还是空白的数据，具体状态由外部传入
+		m_unMark = _unMark;
+		return true;
+	}
+	if (m_unMark == 1) {//说明当前是新建的卡牌信息，需要插入，除了删除外不允许修改状态
+		if (_unMark == 3 || _unMark == 4)
+			return true;//无需更改，这不算失败，如果是删除则由下面更改即可
+		else if (_unMark == 1)
+			return false;
+	}
+	if (m_unMark == 2) {/*如果当前卡牌是已删除的状态，则不允许被更改*/
+		return false;
+	}
+	if (_unMark == 1 && m_unMark > 1)
+		return false;
+	//其余情况都可以更改
 	m_unMark = _unMark;
+	return true;
 }
 
 /*
@@ -82,10 +102,11 @@ bool CCard::Insert() {
 	{
 		stringstream strIn;
 		strIn << "CCard::Insert()\n";
-		mysqlpp::Query* pQuery = g_DB.getQuery();
+		mysqlpp::Query* pQuery = g_DB.GetQuery();
 		if (!*pQuery) {
 			strIn << "Query实例指针错误\n";
-			OutputDebugPrintf(strIn.str().c_str());
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
 			delete pQuery;
 			pQuery = nullptr;
 			return false;
@@ -103,34 +124,40 @@ bool CCard::Insert() {
 		pQuery = nullptr;
 		if (!bRet) {
 			strIn << "往数据库插入用户新卡牌数据失败\n";
-			OutputDebugPrintf(strIn.str().c_str());
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
 			return false;
 		}
 		strIn << "往数据库插入用户新卡牌数据成功\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn << "CCard::Insert()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CCard::Insert()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadIndex& er) {
 		stringstream strIn;
 		strIn << "CCard::Insert()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn << "CCard::Insert()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
@@ -141,10 +168,11 @@ bool CCard::Delete() {
 	{
 		stringstream strIn;
 		strIn << "CCard::Delete()\n";
-		mysqlpp::Query* pQuery = g_DB.getQuery();
+		mysqlpp::Query* pQuery = g_DB.GetQuery();
 		if (!*pQuery) {
 			strIn << "Query实例指针错误\n";
-			OutputDebugPrintf(strIn.str().c_str());
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
 			delete pQuery;
 			pQuery = nullptr;
 			return false;
@@ -158,34 +186,40 @@ bool CCard::Delete() {
 		pQuery = nullptr;
 		if (!bRet) {
 			strIn << "从数据库删除用户卡牌数据失败\n";
-			OutputDebugPrintf(strIn.str().c_str());
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
 			return false;
 		}
 		strIn << "从数据库删除用户卡牌数据成功\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn << "CCard::Delete()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CCard::Delete()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadIndex& er) {
 		stringstream strIn;
 		strIn << "CCard::Delete()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn << "CCard::Delete()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
@@ -196,12 +230,13 @@ bool CCard::Update() {
 	{
 		stringstream strIn;
 		strIn << "CCard::Update()\n";
-		mysqlpp::Query* pQuery = g_DB.getQuery();
+		mysqlpp::Query* pQuery = g_DB.GetQuery();
 		if (!*pQuery) {
 			delete pQuery;
 			pQuery = nullptr;
 			strIn << "Query对象不存在，无法更新数据\n";
-			OutputDebugPrintf(strIn.str().c_str());
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());
 			return false;
 		}
 		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev where id = %4q:CardId;";
@@ -217,34 +252,40 @@ bool CCard::Update() {
 		pQuery = nullptr;
 		if (!bRet) {
 			strIn << "向数据库更新用户卡牌失败\n";
-			OutputDebugPrintf(strIn.str().c_str());
+			string strInput(strIn.str());
+			OutputDebugPrintf(strInput.c_str());;
 			return false;
 		}
 		strIn << "向数据库更新用户卡牌成功\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
 		strIn << "CCard::Update()\nQuery error: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
 		stringstream strIn;
 		strIn << "CCard::Update()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::BadIndex& er) {
 		stringstream strIn;
 		strIn << "CCard::Update()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
 		stringstream strIn;
 		strIn << "CCard::Update()\nError: " << er.what() << "\n";
-		OutputDebugPrintf(strIn.str().c_str());
+		string strInput(strIn.str());
+		OutputDebugPrintf(strInput.c_str());
 		return false;
 	}
 	return true;
