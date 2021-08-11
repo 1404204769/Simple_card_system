@@ -1,8 +1,8 @@
 #pragma once
 #ifndef _LOGINSYSTEM_H_
 #define _LOGINSYSTEM_H_
-#include "UserMgr.h"
 #include <string>
+#include "UserMgr.h"
 extern CDB g_DB;
 extern CUserMgr g_UserMgr;
 class CLoginSystem

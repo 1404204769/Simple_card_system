@@ -2,15 +2,20 @@
 using namespace std;
 using namespace mysqlpp;
 CLoginSystem::CLoginSystem() {
-	cout << "调用了CLoginSystem的构造函数" << endl;
+	stringstream strIn;
+	strIn << "调用了CLoginSystem的构造函数\n";
+	string strInput(strIn.str());
+	OutputDebugPrintf(strInput.c_str());
 }
 CLoginSystem::~CLoginSystem() {
-	cout << "调用了CLoginSystem的析构函数" << endl;
+	stringstream strIn;
+	strIn << "调用了CLoginSystem的析构函数\n";
+	string strInput(strIn.str());
+	OutputDebugPrintf(strInput.c_str());
 }
 bool CLoginSystem::Login(string& _strAccount) {
 	/*参数为登入的account,调用CUserMgrSearchInMap&SearchInDB功能，若不存在返回登入失败*/
-	
-	long long int i64Id = g_UserMgr.getOnlineUserId(_strAccount);
+	long long int i64Id = g_UserMgr.GetOnlineUserId(_strAccount);
 	if (i64Id != 0) {
 		cout << "登入失败,该用户已登入！" << endl;
 		return false;
