@@ -13,7 +13,7 @@ CUser::~CUser()
 	stringstream strIn;
 	strIn<< "调用了CUser的析构函数\n";
 	//cout << "调用了CUser的析构函数" << endl;
-	bool bRet=UpdateUser(*this);
+	bool bRet=Update(*this);
 	if(!bRet)
 		strIn << "用户数据保存失败\n";
 	else 
@@ -61,7 +61,7 @@ void CUser::SetExp(const long long int _i64Exp) {
 /*
 * 以下是数据库层相关接口
 */
-bool CUser::InsertUser() {
+bool CUser::Insert() {
 	/*在数据库中插入新的User数据*/
 	try
 	{
@@ -72,7 +72,6 @@ bool CUser::InsertUser() {
 			strIn<< "Query实例指针错误\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
-			delete pQuery;
 			return false;
 		}
 		*pQuery << "insert into d_user(account,name) values(%0q:account, %1q:name)";
@@ -81,7 +80,6 @@ bool CUser::InsertUser() {
 		pQuery->template_defaults["name"] = m_strName.c_str();
 		bool bRet = g_DB.Insert(*pQuery);
 		strIn<<"Query:" << pQuery->str() << "\n";
-		delete pQuery;
 		if (!bRet) {
 			//cout << "往数据库插入新用户失败" << endl;
 			strIn<<"往数据库插入新用户失败\n";
@@ -124,7 +122,7 @@ bool CUser::InsertUser() {
 	}
 	return true;
 }
-bool CUser::DeleteUser() {
+bool CUser::Delete() {
 	/*在数据库中删除指定User数据*/
 	try
 	{
@@ -135,7 +133,6 @@ bool CUser::DeleteUser() {
 			strIn<< "Query实例指针错误\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
-			delete pQuery;
 			return false;
 		}
 		*pQuery << "delete from d_user where account = %0q:account;";
@@ -143,7 +140,6 @@ bool CUser::DeleteUser() {
 		pQuery->template_defaults["account"] = m_strAccount.c_str();
 		bool bRet = g_DB.Delete(*pQuery);
 		strIn<< "Query:" << pQuery->str() << "\n";
-		delete pQuery;
 		if (!bRet) {
 			strIn<<"从数据库删除用户失败\n";
 			string strInput(strIn.str());
@@ -191,7 +187,7 @@ bool CUser::DeleteUser() {
 	}
 	return true;
 }
-bool CUser::UpdateUser(CUser& user) {
+bool CUser::Update(CUser& user) {
 	/*在数据库中更新指定User*/
 	try
 	{
@@ -199,7 +195,6 @@ bool CUser::UpdateUser(CUser& user) {
 		strIn<<"CUser::UpdateUser()\n";
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
 		if (!*pQuery) {
-			delete pQuery;
 			strIn<<"Query对象不存在，无法更新数据\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
@@ -214,7 +209,6 @@ bool CUser::UpdateUser(CUser& user) {
 		pQuery->template_defaults["id"] = user.m_i64Id;
 		strIn<< "Query:" << pQuery->str()<<"\n";
 		bool bRet = g_DB.Update(*pQuery);
-		delete pQuery;
 		if (!bRet) {
 			//cout << "向数据库更新用户失败" << endl;
 			strIn<<"向数据库更新用户失败\n";
@@ -259,7 +253,7 @@ bool CUser::UpdateUser(CUser& user) {
 
 }
 
-bool CUser::InitUser(mysqlpp::Row& row) {
+bool CUser::Init(mysqlpp::Row& row) {
 	/*根据查询获取的mysqlpp::Row对User对象初始化*/
 	try
 	{
