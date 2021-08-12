@@ -24,11 +24,12 @@ bool CDB::InitConnect(const string& strDB, const string& strServer, const string
 			OutputDebugPrintf("CDB::InitConnect() -> 数据库链接失败");
 			return false;
 		}
-		Query query = m_Conn.query("set names latin1");
-		if (!query)return false;
-		if (!query.exec()) {
+		m_pQuery = new Query(m_Conn.query("set names latin1"));
+		if (!m_pQuery)return false;
+		if (!m_pQuery->exec()) {
 			OutputDebugPrintf("CDB::InitConnect() -> 设置latin1格式失败");
 		}
+
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		stringstream strIn;
@@ -55,13 +56,15 @@ bool CDB::InitConnect(const string& strDB, const string& strServer, const string
 }
 mysqlpp::Query* CDB::GetQuery() {
 	try {
-		Query* pQuery = new Query(m_Conn.query());
-		if (!pQuery) {
+		if(!m_pQuery)
+			m_pQuery = new Query(m_Conn.query());
+		if (!m_pQuery) {
 			OutputDebugPrintf("调用CDB::getQuery()获取Query失败");
 			return nullptr;
 		}
 		OutputDebugPrintf("调用CDB::getQuery()获取Query成功");
-		return pQuery;
+		m_pQuery->reset();
+		return m_pQuery;
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		// Handle any query errors

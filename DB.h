@@ -20,6 +20,7 @@ public:
 private:
 	std::string m_strDB = "test", m_strServer = "localhost", m_strUser = "root", m_strPassword = "root";
 	int m_nPort = 0;
+	mysqlpp::Query* m_pQuery=nullptr;
 	mysqlpp::Connection m_Conn;
 };
 
