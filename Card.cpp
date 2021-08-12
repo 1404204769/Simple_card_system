@@ -79,7 +79,6 @@ bool CCard::Update() {
 		strIn << "CCard::Update()\n";
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
 		if (!*pQuery) {
-			delete pQuery;
 			strIn << "Query对象不存在，无法更新数据\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
@@ -94,7 +93,6 @@ bool CCard::Update() {
 		pQuery->template_defaults["CardId"] = m_i64CardId;
 		strIn << "Query:" << pQuery->str() << "\n";
 		bool bRet = g_DB.Update(*pQuery);
-		delete pQuery;
 		if (!bRet) {
 			strIn << "向数据库更新用户卡牌失败\n";
 			string strInput(strIn.str());
