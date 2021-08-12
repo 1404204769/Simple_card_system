@@ -28,7 +28,6 @@ bool CCardMgr::Init(long long int _i64UserId) {
 			strIn << "Query实例指针错误\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());//打印在控制台
-			delete pQuery;
 			return false;
 		}
 		*pQuery << "select * from d_card where user_id = %0q:UserId;";
@@ -39,10 +38,8 @@ bool CCardMgr::Init(long long int _i64UserId) {
 			strIn << "从数据库查询用户卡牌数据失败\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());//打印在控制台
-			delete pQuery;
 			return false;
 		}
-		delete pQuery;
 		strIn << "从数据库查询用户卡牌数据成功\n";
 		while (row = res.fetch_row()) {
 			CCard* pCard = new CCard();
@@ -157,11 +154,11 @@ bool CCardMgr::AddCard(long long int _i64UserId, const CCardType* _pCardType) {
 bool CCardMgr::DelCardById(long long int _i64CardId) {
 	/*根据玩家卡牌名称来删除数据*/
 	CCard* pCard = m_mapByCardId[_i64CardId];
-	m_mapByCardId.erase(_i64CardId);
 	if (!pCard) {
 		cout << "删除失败，该玩家没有这张叫做（"<<_i64CardId<<"）的卡牌" << endl;
 		return false;
 	}
+	m_mapByCardId.erase(_i64CardId);
 	m_vecDel.push_back(pCard);
 	return true;
 }
@@ -171,12 +168,12 @@ bool CCardMgr::DelAllCard() {
 	MapByCardIdIter iterByName = m_mapByCardId.begin();
 	while (iterByName != m_mapByCardId.end()) {
 		CCard* pCard = iterByName->second;
-		m_vecDel.push_back(pCard);
 		iterByName++;
 		if (!pCard) {
 			bRet = false;
 			continue;
 		}
+		m_vecDel.push_back(pCard);
 	}
 	m_mapByCardId.clear();
 	return bRet;
@@ -214,7 +211,6 @@ bool CCardMgr::Insert(long long int& _i64CardId, const long long int _i64UserId,
 			strIn << "Query实例指针错误\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
-			delete pQuery;
 			return false;
 		}
 		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev)";
@@ -239,10 +235,8 @@ bool CCardMgr::Insert(long long int& _i64CardId, const long long int _i64UserId,
 		mysqlpp::UseQueryResult res;
 		if (!g_DB.Search(res, *pQuery)) {
 			cout << "获取系统分配的CardId失败" << endl;
-			delete pQuery;
 			return false;
 		}
-		delete pQuery;
 		mysqlpp::Row row=res.fetch_row();
 		if (!row) {
 			cout << "没有获取到系统分配的CardId" << endl;
@@ -293,7 +287,6 @@ bool CCardMgr::Delete(CCard& Card) {
 			strIn << "Query实例指针错误\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());
-			delete pQuery;
 			return false;
 		}
 		*pQuery << "delete from d_card where id = %0q:CardId;";
@@ -301,7 +294,6 @@ bool CCardMgr::Delete(CCard& Card) {
 		pQuery->template_defaults["CardId"] = Card.GetCardId();
 		bool bRet = g_DB.Delete(*pQuery);
 		strIn << "Query:" << pQuery->str() << "\n";
-		delete pQuery;
 		if (!bRet) {
 			strIn << "从数据库删除用户卡牌数据失败\n";
 			string strInput(strIn.str());
