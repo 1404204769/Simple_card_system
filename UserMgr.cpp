@@ -98,7 +98,7 @@ bool CUserMgr::AddUser(mysqlpp::Row& row) {
 		delete pUser;
 		return false;
 	}
-	if (!pUser->InitUser(row)) {
+	if (!pUser->Init(row)) {
 		cout << "用户初始化失败" << endl;
 		delete pUser;
 		return false;
@@ -137,7 +137,6 @@ bool CUserMgr::SearchUser(mysqlpp::Row& row, const std::string& _strAccount) {
 			strIn << "Query实例指针错误\n";
 			string strInput(strIn.str());
 			OutputDebugPrintf(strInput.c_str());//打印在控制台
-			delete pQuery;
 			return false;
 		}
 		*pQuery << "select * from d_user where account = %0q:value;";
@@ -145,7 +144,6 @@ bool CUserMgr::SearchUser(mysqlpp::Row& row, const std::string& _strAccount) {
 		pQuery->template_defaults["value"] = _strAccount.c_str();
 		bool bRet = g_DB.Search(res, *pQuery);
 		strIn << "Query:" << pQuery->str() << "\n";
-		delete pQuery;
 		if (!bRet) {
 			strIn << "从数据库查询用户失败\n";
 			string strInput(strIn.str());
@@ -198,7 +196,7 @@ bool CUserMgr::GenerateUser(const string& _strAccount) {
 	cout << "请输入昵称" << endl;
 	getline(cin, strName);
 	user.SetName(strName);
-	if (!user.InsertUser()) {
+	if (!user.Insert()) {
 		cout << "用户注册失败" << endl;
 		return false;
 	}
