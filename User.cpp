@@ -1,52 +1,46 @@
 #include "User.h"
+#include "CardMgr.h"
 using namespace std;
 CUser::CUser(const std::string& _strAccount) {
 	m_strAccount = _strAccount;
-	stringstream strIn;
-	strIn << "调用了CUser构造函数\n";
-	string strInput(strIn.str());
-	OutputDebugPrintf(strInput.c_str());
+	Log("调用了CUser构造函数\n");
 }
 
 CUser::~CUser()
 {
-	stringstream strIn;
-	strIn<< "调用了CUser的析构函数\n";
-	//cout << "调用了CUser的析构函数" << endl;
-	bool bRet=Update(*this);
-	if(!bRet)
-		strIn << "用户数据保存失败\n";
-	else 
-		strIn << "用户数据保存成功\n";
+	Log( "调用了CUser的析构函数\n");
+
+	if (!Update(*this))
+		Log("用户数据保存失败\n");
+	else
+		Log("用户数据保存成功\n");
 	delete m_pCardMgr;
 	m_pCardMgr = nullptr;
-	string strInput(strIn.str());
-	OutputDebugPrintf(strInput.c_str());
-
-	//cout << "用户数据保存："<< UpdateUser(*this)<< endl;
 }
 
 
-const std::string& CUser::GetAccount() {
+const std::string& CUser::GetAccount() const{
 	return m_strAccount;
 }
-const std::string& CUser::GetCreateTime() {
+const std::string& CUser::GetCreateTime() const{
 	return m_strCreateTime;
 }
-const std::string& CUser::GetName() {
+const std::string& CUser::GetName() const{
 	return m_strName;
 }
-const long long int CUser::GetId() {
+long long int CUser::GetId() const{
 	return m_i64Id;
 }
-const long long int CUser::GetExp() {
+long long int CUser::GetExp() const{
 	return m_i64Exp;
 }
-const unsigned int CUser::GetLev() {
+unsigned int CUser::GetLev() const{
 	return m_unLev;
 }
-CCardMgr* CUser::GetCardMgr() {
-	return m_pCardMgr;
+CCardMgr& CUser::GetCardMgr() const{
+	assert(m_pCardMgr);
+
+	return *m_pCardMgr;
 }
 void CUser::SetLev(const unsigned int _unLev) {
 	m_unLev = _unLev;
@@ -65,59 +59,39 @@ bool CUser::Insert() {
 	/*在数据库中插入新的User数据*/
 	try
 	{
-		stringstream strIn;
-		strIn<< "CUser::InsertUser()\n";
+		Log( "CUser::InsertUser()\n");
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!*pQuery) {
-			strIn<< "Query实例指针错误\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());
+		if (!pQuery) {
+			Log("CUser::Insert() Query实例指针错误\n");
 			return false;
 		}
+
 		*pQuery << "insert into d_user(account,name) values(%0q:account, %1q:name)";
 		pQuery->parse();
 		pQuery->template_defaults["account"] = m_strAccount.c_str();
 		pQuery->template_defaults["name"] = m_strName.c_str();
-		bool bRet = g_DB.Insert(*pQuery);
-		strIn<<"Query:" << pQuery->str() << "\n";
-		if (!bRet) {
-			//cout << "往数据库插入新用户失败" << endl;
-			strIn<<"往数据库插入新用户失败\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());
+
+		Log("Query:" + pQuery->str() + "\n");
+		if (!g_DB.Insert(*pQuery)) {
+			Log("CUser::Insert() 往数据库插入新用户失败\n");
 			return false;
 		}
-		//cout << "往数据库插入新用户成功" << endl;
-		strIn<< "往数据库插入新用户成功\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::Insert() 往数据库插入新用户成功\n");
 	}
 	catch (const mysqlpp::BadQuery& er) {
-		stringstream strIn;
-		strIn << "CUser::InsertUser()\nQuery error: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::InsertUser()  Query error: " +string( er.what() )+"\n");
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
-		stringstream strIn;
-		strIn << "CUser::InsertUser()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::InsertUser()  Conversion error: " +string( er.what()) + ",tretrieved data size: " +to_string(er.retrieved) + ", actual size: " +to_string( er.actual_size )+ "\n");
 		return false;
 	}
 	catch (const mysqlpp::BadIndex& er) {
-		stringstream strIn;
-		strIn << "CUser::InsertUser()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::InsertUser()  Error: " +string( er.what()) + "\n");
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
-		stringstream strIn;
-		strIn << "CUser::InsertUser()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::InsertUser()  Error: " +string( er.what()) + "\n");
 		return false;
 	}
 	return true;
@@ -126,63 +100,44 @@ bool CUser::Delete() {
 	/*在数据库中删除指定User数据*/
 	try
 	{
-		stringstream strIn;
-		strIn<<"CUser::DeleteUser()\n";
+		Log("CUser::DeleteUser()\n");
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!*pQuery) {
-			strIn<< "Query实例指针错误\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());
+		if (!pQuery) {
+			Log("CUser::Delete() Query实例指针错误\n");
 			return false;
 		}
+
 		*pQuery << "delete from d_user where account = %0q:account;";
 		pQuery->parse();
 		pQuery->template_defaults["account"] = m_strAccount.c_str();
-		bool bRet = g_DB.Delete(*pQuery);
-		strIn<< "Query:" << pQuery->str() << "\n";
-		if (!bRet) {
-			strIn<<"从数据库删除用户失败\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());
+
+		Log("Query:" + pQuery->str() + "\n");
+		if (!g_DB.Delete(*pQuery)) {
+			Log("CUser::Delete() 从数据库删除用户失败\n");
 			return false;
 		}
-		strIn<< "从数据库删除用户成功\n";
-		if (!m_pCardMgr->DelAllCard()) {
-			strIn << "从数据库删除用户持有的卡牌失败\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());
+		Log("CUser::Delete() 从数据库删除用户成功\n");
+
+		if (!m_pCardMgr->DelAll()) {
+			Log("CUser::Delete() 从数据库删除用户持有的卡牌失败\n");
 			return false;
 		}
-		strIn << "从数据库删除用户持有的卡牌成功\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::Delete() 从数据库删除用户持有的卡牌成功\n");
 	}
 	catch (const mysqlpp::BadQuery& er) {
-		stringstream strIn;
-		strIn << "CUser::DeleteUser()\nQuery error: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::DeleteUser()  Query error: " +string( er.what())+ "\n");
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
-		stringstream strIn;
-		strIn << "CUser::DeleteUser()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::DeleteUser()  Conversion error: " +string( er.what())+ ",tretrieved data size: " +to_string(er.retrieved)  + ", actual size: " +to_string(er.actual_size) + "\n");
 		return false;
 	}
 	catch (const mysqlpp::BadIndex& er) {
-		stringstream strIn;
-		strIn << "CUser::DeleteUser()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::DeleteUser()  Error: " +string(er.what())+  "\n");
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
-		stringstream strIn;
-		strIn << "CUser::DeleteUser()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::DeleteUser()  Error: " +string( er.what()) + "\n");
 		return false;
 	}
 	return true;
@@ -191,15 +146,13 @@ bool CUser::Update(CUser& user) {
 	/*在数据库中更新指定User*/
 	try
 	{
-		stringstream strIn;
-		strIn<<"CUser::UpdateUser()\n";
+		Log("CUser::UpdateUser()\n");
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!*pQuery) {
-			strIn<<"Query对象不存在，无法更新数据\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());
+		if (!pQuery) {
+			Log("CUser::UpdateUser()  Query对象不存在，无法更新数据\n");
 			return false;
 		}
+
 		*pQuery << "update `d_user` set account=%0q:account,`name`=%1q:name,exp=%2:exp,lev=%3:lev where id=%4:id;";
 		pQuery->parse();
 		pQuery->template_defaults["account"] = user.m_strAccount.c_str();
@@ -207,60 +160,43 @@ bool CUser::Update(CUser& user) {
 		pQuery->template_defaults["exp"] = user.m_i64Exp;
 		pQuery->template_defaults["lev"] = user.m_unLev;
 		pQuery->template_defaults["id"] = user.m_i64Id;
-		strIn<< "Query:" << pQuery->str()<<"\n";
-		bool bRet = g_DB.Update(*pQuery);
-		if (!bRet) {
-			//cout << "向数据库更新用户失败" << endl;
-			strIn<<"向数据库更新用户失败\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());
+
+		Log("Query:"+ pQuery->str()+"\n");
+		if (!g_DB.Update(*pQuery)) {
+			Log("CUser::UpdateUser()向数据库更新用户失败\n");
 			return false;
 		}
-		//cout << "向数据库更新用户成功" << endl;
-		strIn<< "向数据库更新用户成功\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::UpdateUser()向数据库更新用户成功\n");
 	}
 	catch (const mysqlpp::BadQuery& er) {
-		stringstream strIn;
-		strIn << "CUser::UpdateUser()\nQuery error: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::UpdateUser()  Query error: " +string( er.what()) + "\n");
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
-		stringstream strIn;
-		strIn << "CUser::UpdateUser()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log( "CUser::UpdateUser()  Conversion error: " +string( er.what() )+ ",tretrieved data size: " +to_string(er.retrieved) +", actual size: " +to_string(er.actual_size)  +"\n");
 		return false;
 	}
 	catch (const mysqlpp::BadIndex& er) {
-		stringstream strIn;
-		strIn << "CUser::UpdateUser()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::UpdateUser()  Error: " + string(er.what()) + "\n");
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
-		stringstream strIn;
-		strIn << "CUser::UpdateUser()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log( "CUser::UpdateUser()  Error: " +string( er.what())+ "\n");
 		return false;
 	}
 	return true;
 
 }
 
-bool CUser::Init(mysqlpp::Row& row) {
+bool CUser::Init(const mysqlpp::Row& row) {
 	/*根据查询获取的mysqlpp::Row对User对象初始化*/
 	try
 	{
 		if (!row) {
-			OutputDebugPrintf("初始化用户失败\n");//打印在控制台
+			Log("初始化用户失败\n");//打印在控制台
 			return false;
 		}/*否则说明找打对应数据，将其映射到CUser对象上*/
+
 		m_strAccount = row["account"];
 		m_strCreateTime = row["create_time"];
 		m_strName = row["name"];
@@ -268,37 +204,28 @@ bool CUser::Init(mysqlpp::Row& row) {
 		m_unLev = row["lev"];
 		m_i64Id = row["id"];
 		m_pCardMgr = new CCardMgr();
-		if (!m_pCardMgr->Init(m_i64Id)) {
+
+		if (!m_pCardMgr->Init(this)) {
 			cout << "用户拥有的卡牌加载失败" << endl;
+			delete m_pCardMgr;
+			m_pCardMgr = nullptr;
 			return false;
 		}
 	}
 	catch (const mysqlpp::BadQuery& er) {
-		stringstream strIn;
-		strIn << "CUser::InitUser()\nQuery error: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::InitUser()  Query error: " +string( er.what() )+ "\n");
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
-		stringstream strIn;
-		strIn << "CUser::InitUser()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::InitUser()  Conversion error: " +string( er.what())+ ",tretrieved data size: " +to_string(er.retrieved)  + ", actual size: " +to_string(er.actual_size)  + "\n");
 		return false;
 	}
 	catch (const mysqlpp::BadIndex& er) {
-		stringstream strIn;
-		strIn << "CUser::InitUser()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::InitUser()  Error: " +string( er.what())+ "\n");
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
-		stringstream strIn;
-		strIn << "CUser::InitUser()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CUser::InitUser()  Error: " +string( er.what()) + "\n");
 		return false;
 	}
 	return true;

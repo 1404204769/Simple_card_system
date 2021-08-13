@@ -2,39 +2,33 @@
 using namespace std;
 CCardTypeMgr::CCardTypeMgr() {
 	/*构造函数*/
-	stringstream strIn;
-	strIn << "调用了CCardTypeMgr构造函数\n";
-	string strInput(strIn.str());
-	OutputDebugPrintf(strInput.c_str());
+	Log("调用了CCardTypeMgr构造函数\n");
 }
 CCardTypeMgr::~CCardTypeMgr() {
 	/*析构函数*/
 	Free();
-	stringstream strIn;
-	strIn << "调用了CCardTypeMgr析构函数\n";
-	string strInput(strIn.str());
-	OutputDebugPrintf(strInput.c_str());
+	Log("调用了CCardTypeMgr析构函数\n");
 }
-const CCardType* CCardTypeMgr::GetCardTypeByType(unsigned int _unType) {
+const CCardType* CCardTypeMgr::Get(unsigned int _unType) {
 	/*根据卡牌ID获取数据*/
 	/*从map里面查询，返回查询对象指针*/
-    MapByTypeIter iterByType= m_mapByType.find(_unType);
+	CardTypeMapIter iterByType = m_mapByType.find(_unType);
 	if (iterByType == m_mapByType.end()) {
 		cout << "Do not Find CardTypeID:" << _unType << endl;
 		return nullptr;
 	}
 	return iterByType->second;
 }
-void CCardTypeMgr::PrintAllCardType() {
+void CCardTypeMgr::PrintAll() {
 	/*打印显示所有卡牌类型*/
-	MapByTypeIter iterByType = m_mapByType.begin();
+	CardTypeMapIter iterByType = m_mapByType.begin();
 	while (iterByType != m_mapByType.end()) {
 		const CCardType* pCardType = iterByType->second;
 		iterByType++;
 		if (!pCardType) {
 			continue;
 		}
-		cout << "ID:" << pCardType->GetId() << "\tCardType:" << pCardType->GetCardType() << "\tName:" << pCardType->GetName()<<"\tHp:"<< pCardType->GetHp()<< "\tMp:" << pCardType->GetMp() << "\tAtk:" << pCardType->GetAtk() << endl;
+		cout << "ID:" << pCardType->GetId() << "\tCardType:" << pCardType->GetCardType() << "\tName:" << pCardType->GetName() << "\tHp:" << pCardType->GetHp() << "\tMp:" << pCardType->GetMp() << "\tAtk:" << pCardType->GetAtk() << endl;
 	}
 }
 bool CCardTypeMgr::Init() {
@@ -43,80 +37,59 @@ bool CCardTypeMgr::Init() {
 	{
 		mysqlpp::UseQueryResult res;
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		stringstream strIn;
-		strIn << "CCardTypeMgr::Init()\n";
-		if (!*pQuery) {
-			strIn << "Query实例指针错误\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());//打印在控制台
+
+		Log("CCardTypeMgr::Init()\n");
+		if (!pQuery) {
+			Log("CCardTypeMgr::Init()  Query实例指针错误\n");//打印在控制台
 			return false;
 		}
+
 		*pQuery << "select * from s_card;";
 		pQuery->parse();
-		bool bRet = g_DB.Search(res, *pQuery);
-		strIn << "Query:" << pQuery->str() << "\n";
-		if (!bRet) {
-			strIn << "从数据库加载卡牌池失败\n";
-			string strInput(strIn.str());
-			OutputDebugPrintf(strInput.c_str());//打印在控制台
+
+		Log("Query:" + pQuery->str() + "\n");
+		if (!g_DB.Search(res, *pQuery)) {
+			Log("CCardTypeMgr::Init()  从数据库加载卡牌池失败\n");//打印在控制台
 			return false;
 		}
-		strIn << "从数据库加载卡牌池成功\n";
+		Log("CCardTypeMgr::Init()  从数据库加载卡牌池成功\n");
+
 		mysqlpp::Row row;
 		while (row = res.fetch_row()) {
-			CCardType* pCardType=new CCardType();
+			unique_ptr<CCardType>  pCardType(new CCardType());
 			if (!pCardType) {
-				strIn << "卡牌类型实体化失败\n";
-				string strInput(strIn.str());
-				OutputDebugPrintf(strInput.c_str());//打印在控制台
-				delete pCardType;
+				Log("CCardTypeMgr::Init()  卡牌类型实体化失败\n");//打印在控制台
 				return false;
 			}
 			if (!pCardType->Init(row)) {
-				strIn << "卡牌类型初始化失败\n";
-				string strInput(strIn.str());
-				OutputDebugPrintf(strInput.c_str());//打印在控制台
-				delete pCardType;
+				Log("CCardTypeMgr::Init()  卡牌类型初始化失败\n");//打印在控制台
 				return false;
 			}
-			m_mapByType[pCardType->GetCardType()] = pCardType;
+			m_mapByType[pCardType->GetCardType()] = pCardType.release();
 		}
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());//打印在控制台
 	}
 	catch (const mysqlpp::BadQuery& er) {
-		stringstream strIn;
-		strIn << "CCardTypeMgr::Init()\nQuery error: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CCardTypeMgr::Init()  Query error: " +string( er.what())+ "\n");
 		return false;
 	}
 	catch (const mysqlpp::BadConversion& er) {
-		stringstream strIn;
-		strIn << "CCardTypeMgr::Init()\nConversion error: " << er.what() << "\ntretrieved data size: " << er.retrieved << ", actual size: " << er.actual_size << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CCardTypeMgr::Init()  Conversion error: " +string(er.what())+ ",tretrieved data size: " +to_string(er.retrieved ) + ", actual size: " +to_string(er.actual_size)  + "\n");
 		return false;
 	}
-	catch (const mysqlpp::BadIndex& er) {
-		stringstream strIn;
-		strIn << "CCardTypeMgr::Init()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+	catch (const mysqlpp::BadIndex& er)
+	{
+		Log("CCardTypeMgr::Init()  Error: " +string( er.what() )+ "\n");
 		return false;
 	}
 	catch (const mysqlpp::Exception& er) {
-		stringstream strIn;
-		strIn << "CCardTypeMgr::Init()\nError: " << er.what() << "\n";
-		string strInput(strIn.str());
-		OutputDebugPrintf(strInput.c_str());
+		Log("CCardTypeMgr::Init()  Error: " + string(er.what()) + "\n");
 		return false;
 	}
 	return true;
 }
 void CCardTypeMgr::Free() {
 	/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
-	MapByTypeIter iterByType = m_mapByType.begin();
+	CardTypeMapIter iterByType = m_mapByType.begin();
 	while (iterByType != m_mapByType.end()) {
 		delete iterByType->second;//先释放内存
 		iterByType->second = nullptr;//置空

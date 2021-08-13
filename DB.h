@@ -2,7 +2,6 @@
 #ifndef _DB_H_
 #define _DB_H_
 #include <string>
-#include <sstream>
 #include <iostream>
 #include <mysql++.h>
 #include <windows.h>
@@ -23,5 +22,5 @@ private:
 	mysqlpp::Query* m_pQuery=nullptr;
 	mysqlpp::Connection m_Conn;
 };
-
+extern CDB g_DB;
 #endif // !_DB_H_

@@ -9,7 +9,6 @@
 using namespace std;
 CDB g_DB;
 CUserMgr g_UserMgr;
-CCardMgr g_CardMgr;
 CCardTypeMgr g_CardTypeMgr;
 CLoginSystem g_LoginSystem;
 CUserLevelSystem g_UserLevelSystem;
@@ -52,7 +51,7 @@ bool Subject(int nchoice) {
 		cout << "请输入要新增的卡牌的类型" << endl;
 		cin >> unCardType;
 		getchar();
-		if (!g_CardSystem.AddUserCard(strUserAccount, unCardType))
+		if (!g_CardSystem.Add(strUserAccount, unCardType))
 			cout << "卡牌新增失败" << endl;
 		else
 			cout << "卡牌新增成功" << endl;
@@ -64,7 +63,7 @@ bool Subject(int nchoice) {
 		cout << "请输入要删除的卡牌的Id" << endl;
 		long long int i64CardId;
 		cin >> i64CardId;
-		if (!g_CardSystem.DelUserCard(strUserAccount, i64CardId))
+		if (!g_CardSystem.Del(strUserAccount, i64CardId))
 			cout << "卡牌删除失败" << endl;
 		else
 			cout << "卡牌删除成功" << endl;
@@ -73,7 +72,7 @@ bool Subject(int nchoice) {
 		string strUserAccount;
 		cout << "请输入指定玩家的账户" << endl;
 		getline(cin, strUserAccount);
-		if (!g_CardSystem.ShowUserCard(strUserAccount))
+		if (!g_CardSystem.Show(strUserAccount))
 			cout << "查询玩家所有卡牌失败" << endl;
 		else
 			cout << "查询玩家所有卡牌成功" << endl;
@@ -85,13 +84,13 @@ bool Subject(int nchoice) {
 		cout << "请输入要查询攻击力的卡牌的Id" << endl;
 		long long int i64CardId;
 		cin >> i64CardId;
-		if (!g_CardSystem.ShowUserCardAtk(strUserAccount, i64CardId))
+		if (!g_CardSystem.ShowAtk(strUserAccount, i64CardId))
 			cout << "查询玩家指定卡牌攻击力失败" << endl;
 		else
 			cout << "查询玩家指定卡牌攻击力成功" << endl;
 	}break;
 	case 7: {
-		g_UserMgr.PrintOnlineUser();
+		g_UserMgr.PrintOnline();
 	}break;
 	default:return false;
 		break;
