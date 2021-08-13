@@ -28,7 +28,7 @@ bool CCardMgr::Init(CUser* pUser) {
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
 
 		Log( "CCardMgr::Init()\n");
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("Query实例指针错误\n");//打印在控制台
 			return false;
 		}
@@ -99,9 +99,13 @@ void CCardMgr::PrintAll() {
 		if (!pCard) {
 			continue;
 		}
-		cout << "CardID:" << pCard->GetCardId() << "\tUserId:" << pCard->GetUserId() << "\tCardType:" << pCard->GetCardType() << "\tName:" << pCard->GetName() << "\tExp:" << pCard->GetExp() << "\tLev:" << pCard->GetLev()  << endl;
-		const CCardType &pCardType = pCard->GetCardTypeData();
-		cout << "\t(ID:" << pCardType.GetId() << "\tCardTypeId:" << pCardType.GetCardType() << "\tCardName:" << pCardType.GetName() << "\tHp:" << pCardType.GetHp() << "\tMp:" << pCardType.GetMp() << "\tAtk:" << pCardType.GetAtk() <<")" << endl;
+		const CCardType& CardType = pCard->GetCardTypeData();
+		const CCardLevAttrType& CardLevAttrType = pCard->GetCardLevAttrTypeData();
+		cout << "CardID:" << pCard->GetCardId() << "\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName() << "\tLev:" << pCard->GetLev()
+			<< "\tExp:" << pCard->GetExp() 
+			<< "\tHp:" << CardType.GetHp()+CardLevAttrType.GetHp() 
+			<< "\tMp:" << CardType.GetMp()+CardLevAttrType.GetMp()
+			<< "\tAtk:" << CardType.GetAtk()+CardLevAttrType.GetAtk()<<endl;
 	}
 }
 bool CCardMgr::Add(const CCardType* pCardType) {

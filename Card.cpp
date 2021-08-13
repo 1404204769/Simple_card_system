@@ -8,8 +8,11 @@ CCard::CCard() {
 CCard::~CCard(){
 	/*析构函数*/
 	Log("调用了CCard析构函数\n");
-	Update();
-	m_pCardType = nullptr;
+
+	if (!Update())
+		Log("用户卡牌数据保存失败\n");
+	else
+		Log("用户卡牌数据保存成功\n");
 }
 
 bool CCard::CreateNewCard(const long long int i64UserId, const CCardType* pCardType) {
@@ -23,20 +26,19 @@ bool CCard::CreateNewCard(const long long int i64UserId, const CCardType* pCardT
 		cout << "用户ID不合法" << endl;
 		return false;
 	}
-
+	if (!SetLevel(1)) {/*初始等级为0*/
+		cout << "卡牌等级无效" << endl;
+		return false;
+	}
 	m_i64UserId = i64UserId;
 	m_unCardType = pCardType->GetCardType();
 	m_strName = pCardType->GetName();
 	m_i64Exp = 0;
-	m_unLev = 0;
 	m_pCardType = pCardType;
-
 	if (!Insert(m_i64CardId)) {
 		cout << "新卡牌插入数据库失败" << endl;
 		return false;
 	}
-	if (m_i64UserId == 0 || !m_pCardType)
-		return false;
 	return true;
 }
 bool CCard::CreateFromDB(const mysqlpp::Row& row, const CCardType* pCardType) {
@@ -54,18 +56,20 @@ bool CCard::CreateFromDB(const mysqlpp::Row& row, const CCardType* pCardType) {
 			cout << "卡牌类型无效，新建卡牌失败" << endl;
 			return false;
 		}
-
-		m_i64CardId = row["id"];
-		m_i64UserId = row["user_id"];
 		m_unCardType = row["card_type"];
-		if(m_unCardType!=pCardType->GetCardType())
+		if (m_unCardType != pCardType->GetCardType())
 		{
 			cout << "卡牌类型不匹配，新建卡牌失败" << endl;
 			return false;
 		}
+		if (!SetLevel(row["lev"])) {
+			cout << "卡牌等级无效" << endl;
+			return false;
+		}
+		m_i64CardId = row["id"];
+		m_i64UserId = row["user_id"];
 		m_strName = row["name"];
 		m_i64Exp = row["exp"];
-		m_unLev = row["lev"];
 		m_pCardType = pCardType;
 
 	}
@@ -115,10 +119,31 @@ long long int CCard::GetExp() const{
 const CCardType& CCard::GetCardTypeData() const{
 	/*获取对应的卡牌类型详细数据*/
 	assert(m_pCardType);
-
 	return *m_pCardType;
 }
+const CCardLevAttrType& CCard::GetCardLevAttrTypeData() const {
+	/*获取对应卡牌等级的加成数据*/
+	assert(m_pCardLevAttrType);
 
+	return *m_pCardLevAttrType;
+}
+
+bool CCard::LevelUp(unsigned int unLev) {
+	/*提升卡牌等级，更换加成数据*/
+	return SetLevel(unLev + m_unLev);
+}
+bool CCard::SetLevel(unsigned int unLev) {
+	if (unLev <= 0)
+		return false;
+	const CCardLevAttrType* pCardLevAttrType = g_CardLevAttrTypeMgr.Get(unLev);
+	if (!pCardLevAttrType) {
+		cout << "卡牌等级超出限制" << endl;
+		return false;
+	}
+	m_pCardLevAttrType = pCardLevAttrType;
+	m_unLev = unLev;
+	return true;
+}
 /*
 * 以下是数据库层相关接口
 */
@@ -130,7 +155,7 @@ bool CCard::Insert(long long int& i64CardId_Out) {
 	try
 	{
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("CCard::Insert()  Query实例指针错误\n");
 			return false;
 		}
@@ -192,7 +217,7 @@ bool CCard::Delete() {
 	{
 		Log("CCard::Delete()\n");
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("CCard::Delete()  Query实例指针错误\n");
 			return false;
 		}
@@ -207,7 +232,6 @@ bool CCard::Delete() {
 			return false;
 		}
 		Log("CCard::Delete()  从数据库删除用户卡牌数据成功\n");
-		m_pCardType = nullptr;
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		Log("CCard::Delete()  Query error: " +string( er.what())+"\n");
@@ -233,7 +257,7 @@ bool CCard::Update() {
 	{
 		Log("CCard::Update()\n");
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("CCard::Update()  Query对象不存在，无法更新数据\n");
 			return false;
 		}

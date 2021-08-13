@@ -39,7 +39,7 @@ bool CCardTypeMgr::Init() {
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
 
 		Log("CCardTypeMgr::Init()\n");
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("CCardTypeMgr::Init()  Query实例指针错误\n");//打印在控制台
 			return false;
 		}

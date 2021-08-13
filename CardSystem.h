@@ -14,6 +14,7 @@ public:
 
 	bool Add(const std::string& strUserAccount,const unsigned int unCardType);/*为指定玩家增加一副指定的卡牌*/
 	bool Del(const std::string& strUserAccount,const long long int i64CardId);/*为指定玩家删除指定卡牌*/
+	bool CardLevUp(const std::string& strUserAccount, const long long int i64CardId, const unsigned int unLev);/*为指定玩家的指定卡牌提升指定等级*/
 	bool Show(const std::string& strUserAccount);/*打印显示指定用户的所有卡牌*/
 	bool ShowAtk(const std::string& strUserAccount,const long long int i64CardId);/*打印显示指定用户的指定卡牌的攻击力*/
 };

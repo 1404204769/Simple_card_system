@@ -145,7 +145,7 @@ bool CUserMgr::SearchDB(mysqlpp::Row& row, const std::string& _strAccount) {
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
 
 		Log("CUserMgr::SearchUser()\n");
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("CUserMgr::SearchUser()  Query实例指针错误\n");//打印在控制台
 			return false;
 		}

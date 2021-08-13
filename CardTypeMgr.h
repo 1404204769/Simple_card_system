@@ -11,7 +11,7 @@ public:
 	CCardTypeMgr();/*构造函数*/
 	~CCardTypeMgr();/*析构函数*/
 
-	const CCardType* Get(const unsigned int unType);/*根据卡牌ID获取数据*/
+	const CCardType* Get(const unsigned int unType);/*根据卡牌类型获取数据*/
 
 	void PrintAll();/*打印显示所有卡牌类型*/
 	bool Init();/*调用CDB函数查找指定对象,返回查询结果，如果引用的CUser对象的ID为0则说明数据库中无此数据*/

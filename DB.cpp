@@ -49,9 +49,11 @@ bool CDB::InitConnect(const string& strDB, const string& strServer, const string
 }
 mysqlpp::Query* CDB::GetQuery() {
 	try {
-		if(!m_pQuery)
+		if (!*m_pQuery) {
+			delete m_pQuery;
 			m_pQuery = new Query(m_Conn.query());
-		if (!m_pQuery) {
+		}
+		if (!*m_pQuery) {
 			Log("调用CDB::getQuery()获取Query失败\n");
 			return nullptr;
 		}

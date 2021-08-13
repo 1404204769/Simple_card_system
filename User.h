@@ -31,7 +31,7 @@ public:
 	bool Delete();/*在数据库中删除指定User数据*/
 
 private:
-	bool Update(CUser& pUser);/*在数据库中更新指定User*/
+	bool Update();/*在数据库中更新指定User*/
 
 	unsigned int m_unLev = 0;
 	long long int m_i64Id = 0, m_i64Exp = 0;

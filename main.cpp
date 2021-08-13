@@ -6,13 +6,15 @@
 #include "CardTypeMgr.h"
 #include "LoginSystem.h"
 #include "UserLevelSystem.h"
+#include "CardLevAttrTypeMgr.h"
 using namespace std;
 CDB g_DB;
 CUserMgr g_UserMgr;
-CCardTypeMgr g_CardTypeMgr;
-CLoginSystem g_LoginSystem;
-CUserLevelSystem g_UserLevelSystem;
 CCardSystem g_CardSystem;
+CLoginSystem g_LoginSystem;
+CCardTypeMgr g_CardTypeMgr;
+CUserLevelSystem g_UserLevelSystem;
+CCardLevAttrTypeMgr g_CardLevAttrTypeMgr;
 const string strDB("test");
 const string strServer("localhost");
 const string strUser("root");
@@ -21,6 +23,7 @@ const int nPort = 3306;
 void Init() {
 	g_DB.InitConnect(strDB, strServer, strUser, strPassword, nPort);
 	g_CardTypeMgr.Init();
+	g_CardLevAttrTypeMgr.Init();
 }
 bool Subject(int nchoice) {
 	switch (nchoice)
@@ -92,6 +95,21 @@ bool Subject(int nchoice) {
 	case 7: {
 		g_UserMgr.PrintOnline();
 	}break;
+	case 8: {
+		string strUserAccount;
+		cout << "请输入指定玩家的账户" << endl;
+		getline(cin, strUserAccount);
+		cout << "请输入要升级的卡牌的Id" << endl;
+		long long int i64CardId;
+		cin >> i64CardId;
+		cout << "请输入要提升的等级" << endl;
+		unsigned int unLev;
+		cin >> unLev;
+		if (!g_CardSystem.CardLevUp(strUserAccount, i64CardId,unLev))
+			cout << "卡牌升级失败" << endl;
+		else
+			cout << "卡牌升级成功" << endl;
+	}break;
 	default:return false;
 		break;
 	}
@@ -102,7 +120,7 @@ int main() {
 	bool bContinue = true;
 	while (bContinue) {
 		system("cls");
-		cout << "请选择功能:\n1.登入\n2.注销\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息" << endl;
+		cout << "请选择功能:\n1.登入\n2.注销\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级" << endl;
 		int nchoice = 1;
 		cin >> nchoice;
 		getchar();

@@ -10,7 +10,7 @@ CUser::~CUser()
 {
 	Log( "调用了CUser的析构函数\n");
 
-	if (!Update(*this))
+	if (!Update())
 		Log("用户数据保存失败\n");
 	else
 		Log("用户数据保存成功\n");
@@ -61,7 +61,7 @@ bool CUser::Insert() {
 	{
 		Log( "CUser::InsertUser()\n");
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("CUser::Insert() Query实例指针错误\n");
 			return false;
 		}
@@ -102,7 +102,7 @@ bool CUser::Delete() {
 	{
 		Log("CUser::DeleteUser()\n");
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("CUser::Delete() Query实例指针错误\n");
 			return false;
 		}
@@ -142,24 +142,24 @@ bool CUser::Delete() {
 	}
 	return true;
 }
-bool CUser::Update(CUser& user) {
+bool CUser::Update() {
 	/*在数据库中更新指定User*/
 	try
 	{
 		Log("CUser::UpdateUser()\n");
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
-		if (!pQuery) {
+		if (!*pQuery) {
 			Log("CUser::UpdateUser()  Query对象不存在，无法更新数据\n");
 			return false;
 		}
 
 		*pQuery << "update `d_user` set account=%0q:account,`name`=%1q:name,exp=%2:exp,lev=%3:lev where id=%4:id;";
 		pQuery->parse();
-		pQuery->template_defaults["account"] = user.m_strAccount.c_str();
-		pQuery->template_defaults["name"] = user.m_strName.c_str();
-		pQuery->template_defaults["exp"] = user.m_i64Exp;
-		pQuery->template_defaults["lev"] = user.m_unLev;
-		pQuery->template_defaults["id"] = user.m_i64Id;
+		pQuery->template_defaults["account"] = m_strAccount.c_str();
+		pQuery->template_defaults["name"] = m_strName.c_str();
+		pQuery->template_defaults["exp"] = m_i64Exp;
+		pQuery->template_defaults["lev"] = m_unLev;
+		pQuery->template_defaults["id"] = m_i64Id;
 
 		Log("Query:"+ pQuery->str()+"\n");
 		if (!g_DB.Update(*pQuery)) {
