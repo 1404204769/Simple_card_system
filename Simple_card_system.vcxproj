@@ -153,6 +153,7 @@
     <ClInclude Include="DB.h" />
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="LoginSystem.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="UserLevelSystem.h" />
     <ClInclude Include="UserMgr.h" />
