@@ -5,6 +5,7 @@
 #include "CardSystem.h"
 #include "CardTypeMgr.h"
 #include "LoginSystem.h"
+#include "SkinTypeMgr.h"
 #include "UserLevelSystem.h"
 #include "CardLevAttrTypeMgr.h"
 using namespace std;
@@ -13,6 +14,7 @@ CUserMgr g_UserMgr;
 CCardSystem g_CardSystem;
 CLoginSystem g_LoginSystem;
 CCardTypeMgr g_CardTypeMgr;
+CSkinTypeMgr g_SkinTypeMgr;
 CUserLevelSystem g_UserLevelSystem;
 CCardLevAttrTypeMgr g_CardLevAttrTypeMgr;
 const string strDB("test");
@@ -23,6 +25,8 @@ const int nPort = 3306;
 void Init() {
 	g_DB.InitConnect(strDB, strServer, strUser, strPassword, nPort);
 	g_CardTypeMgr.Init();
+	g_SkinTypeMgr.Init();
+	g_SkinTypeMgr.PrintAll();
 	g_CardLevAttrTypeMgr.Init();
 }
 bool Subject(int nchoice) {
@@ -117,7 +121,7 @@ bool Subject(int nchoice) {
 }
 int main() {
 	Init();
-	bool bContinue = true;
+	/*bool bContinue = true;
 	while (bContinue) {
 		system("cls");
 		cout << "请选择功能:\n1.登入\n2.注销\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级" << endl;
@@ -126,7 +130,7 @@ int main() {
 		getchar();
 		bContinue = Subject(nchoice);
 		system("pause");
-	}
+	}*/
 
 	return 0;
 }
