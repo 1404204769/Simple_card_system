@@ -43,7 +43,7 @@ bool CCardMgr::Init(CUser* pUser) {
 			return false;
 		}
 		Log("CCardMgr::Init()  从数据库查询用户卡牌数据成功\n");
-
+		CSkinMgr &SkinMgr = m_pUser->GetSkinMgr();
 		while (row = res.fetch_row()) {
 			unique_ptr<CCard> pCard(new CCard());
 			if (!pCard) {
@@ -59,7 +59,14 @@ bool CCardMgr::Init(CUser* pUser) {
 				Log("CCardMgr::Init()  卡牌类型初始化失败\n");//打印在控制台
 				return false;
 			}
+			long long int i64SkinId = pCard->GetSkinId();
+			pCard->SetSkinId(0);
+			long long int i64CardId = pCard->GetCardId();
 			m_mapByCardId[pCard->GetCardId()] = pCard.release();
+			if (i64SkinId != 0&& !SkinMgr.Wear(i64CardId, i64SkinId)) {
+				cout << "用户卡牌初始化穿戴皮肤发生错误" << endl;
+				return false;
+			}
 		}
 
 	}
@@ -92,6 +99,11 @@ CCard* CCardMgr::Get(const long long int _i64CardId) {
 }
 void CCardMgr::PrintAll() {
 	/*打印显示拥有的所有卡牌的数据*/
+	if (!m_pUser) {
+		cout << "卡牌管理器与用户失联" << endl;
+		return;
+	}
+	CSkinMgr& SkinMgr = m_pUser->GetSkinMgr();
 	CardMapIter iterById = m_mapByCardId.begin();
 	while (iterById != m_mapByCardId.end()) {
 		CCard* pCard = iterById->second;
@@ -101,11 +113,30 @@ void CCardMgr::PrintAll() {
 		}
 		const CCardType& CardType = pCard->GetCardTypeData();
 		const CCardLevAttrType& CardLevAttrType = pCard->GetCardLevAttrTypeData();
-		cout << "CardID:" << pCard->GetCardId() << "\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName() << "\tLev:" << pCard->GetLev()
-			<< "\tExp:" << pCard->GetExp() 
-			<< "\tHp:" << CardType.GetHp()+CardLevAttrType.GetHp() 
-			<< "\tMp:" << CardType.GetMp()+CardLevAttrType.GetMp()
-			<< "\tAtk:" << CardType.GetAtk()+CardLevAttrType.GetAtk()<<endl;
+		long long int Hp = 0, Mp = 0, Atk = 0;
+		string strSkinName = "无";
+		if (pCard->GetSkinId()) {
+			CSkin* pSkin = SkinMgr.Get(pCard->GetSkinId());
+			if (!pSkin) {
+				cout << "皮肤数据发生错误" << endl;
+				continue;
+			}
+			unsigned int SkinType = pSkin->GetSkinType();
+			const CSkinType* pSkinType = g_SkinTypeMgr.Get(SkinType);
+			if (!pSkinType) {
+				cout << "皮肤类型数据发生错误" << endl;
+				continue;
+			}
+			Hp += pSkinType->GetHp();
+			Mp += pSkinType->GetMp();
+			Atk += pSkinType->GetAtk();
+			strSkinName = pSkinType->GetName();
+		}
+		Hp += CardType.GetHp() + CardLevAttrType.GetHp();
+		Mp += CardType.GetMp() + CardLevAttrType.GetMp();
+		Atk+= CardType.GetAtk() + CardLevAttrType.GetAtk();
+		cout << "CardID:" << pCard->GetCardId() << "\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName() <<"\tSkin:"<<strSkinName
+			<< "\tLev:" << pCard->GetLev() << "\tExp:" << pCard->GetExp() << "\tHp:" << Hp << "\tMp:" << Mp << "\tAtk:" << Atk << endl;
 	}
 }
 bool CCardMgr::Add(const CCardType* pCardType) {

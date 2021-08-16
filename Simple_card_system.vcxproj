@@ -155,6 +155,8 @@
     <ClInclude Include="DB.h" />
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="LoginSystem.h" />
+    <ClInclude Include="Skin.h" />
+    <ClInclude Include="SkinMgr.h" />
     <ClInclude Include="SkinType.h" />
     <ClInclude Include="SkinTypeMgr.h" />
     <ClInclude Include="User.h" />
@@ -172,6 +174,8 @@
     <ClCompile Include="DB.cpp" />
     <ClCompile Include="LoginSystem.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Skin.cpp" />
+    <ClCompile Include="SkinMgr.cpp" />
     <ClCompile Include="SkinType.cpp" />
     <ClCompile Include="SkinTypeMgr.cpp" />
     <ClCompile Include="User.cpp" />

@@ -5,6 +5,7 @@
 #include <string>
 #include <mysql++.h>
 class CCardMgr;
+class CSkinMgr;
 class CUser
 {
 public:
@@ -18,6 +19,7 @@ public:
 	long long int GetExp() const;
 	unsigned int GetLev() const;
 	CCardMgr& GetCardMgr() const;
+	CSkinMgr& GetSkinMgr() const;
 	void SetLev(const unsigned int unLev);
 	void SetExp(const long long int i64Exp);
 	void SetName(const std::string& strName);
@@ -37,6 +39,7 @@ private:
 	long long int m_i64Id = 0, m_i64Exp = 0;
 	std::string m_strAccount, m_strCreateTime, m_strName;
 	CCardMgr* m_pCardMgr=nullptr;
+	CSkinMgr* m_pSkinMgr = nullptr;
 };
 
 #endif //!_USER_H_

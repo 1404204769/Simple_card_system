@@ -78,6 +78,12 @@
     <ClInclude Include="SkinTypeMgr.h">
       <Filter>头文件\数据管理层</Filter>
     </ClInclude>
+    <ClInclude Include="Skin.h">
+      <Filter>头文件\数据层</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinMgr.h">
+      <Filter>头文件\数据管理层</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DB.cpp">
@@ -123,6 +129,12 @@
       <Filter>源文件\数据层</Filter>
     </ClCompile>
     <ClCompile Include="SkinTypeMgr.cpp">
+      <Filter>源文件\数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="Skin.cpp">
+      <Filter>源文件\数据层</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinMgr.cpp">
       <Filter>源文件\数据管理层</Filter>
     </ClCompile>
   </ItemGroup>

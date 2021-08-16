@@ -26,7 +26,7 @@ void Init() {
 	g_DB.InitConnect(strDB, strServer, strUser, strPassword, nPort);
 	g_CardTypeMgr.Init();
 	g_SkinTypeMgr.Init();
-	g_SkinTypeMgr.PrintAll();
+	//g_SkinTypeMgr.PrintAll();
 	g_CardLevAttrTypeMgr.Init();
 }
 bool Subject(int nchoice) {
@@ -58,7 +58,7 @@ bool Subject(int nchoice) {
 		cout << "请输入要新增的卡牌的类型" << endl;
 		cin >> unCardType;
 		getchar();
-		if (!g_CardSystem.Add(strUserAccount, unCardType))
+		if (!g_CardSystem.AddCard(strUserAccount, unCardType))
 			cout << "卡牌新增失败" << endl;
 		else
 			cout << "卡牌新增成功" << endl;
@@ -70,7 +70,7 @@ bool Subject(int nchoice) {
 		cout << "请输入要删除的卡牌的Id" << endl;
 		long long int i64CardId;
 		cin >> i64CardId;
-		if (!g_CardSystem.Del(strUserAccount, i64CardId))
+		if (!g_CardSystem.DelCard(strUserAccount, i64CardId))
 			cout << "卡牌删除失败" << endl;
 		else
 			cout << "卡牌删除成功" << endl;
@@ -79,7 +79,7 @@ bool Subject(int nchoice) {
 		string strUserAccount;
 		cout << "请输入指定玩家的账户" << endl;
 		getline(cin, strUserAccount);
-		if (!g_CardSystem.Show(strUserAccount))
+		if (!g_CardSystem.ShowCard(strUserAccount))
 			cout << "查询玩家所有卡牌失败" << endl;
 		else
 			cout << "查询玩家所有卡牌成功" << endl;
@@ -91,7 +91,7 @@ bool Subject(int nchoice) {
 		cout << "请输入要查询攻击力的卡牌的Id" << endl;
 		long long int i64CardId;
 		cin >> i64CardId;
-		if (!g_CardSystem.ShowAtk(strUserAccount, i64CardId))
+		if (!g_CardSystem.ShowCardAtk(strUserAccount, i64CardId))
 			cout << "查询玩家指定卡牌攻击力失败" << endl;
 		else
 			cout << "查询玩家指定卡牌攻击力成功" << endl;
@@ -114,6 +114,53 @@ bool Subject(int nchoice) {
 		else
 			cout << "卡牌升级成功" << endl;
 	}break;
+	case 9: {
+		long long int i64UserId, i64CardId, i64SkinId;
+		cout << "请输入指定玩家的Id" << endl;
+		cin >> i64UserId;
+		cout << "请输入要穿戴的卡牌的Id" << endl;
+		cin >> i64CardId;
+		cout << "请输入要穿戴的皮肤的Id" << endl;
+		cin >> i64SkinId;
+		if (!g_CardSystem.Wear(i64UserId, i64CardId, i64SkinId))
+			cout << "皮肤穿戴失败" << endl;
+		else
+			cout << "皮肤穿戴成功" << endl;
+	}break;
+	case 10: {
+		long long int i64UserId, i64CardId, i64SkinId;
+		cout << "请输入指定玩家的Id" << endl;
+		cin >> i64UserId;
+		cout << "请输入要脱下皮肤的卡牌Id" << endl;
+		cin >> i64CardId;
+		cout << "请输入要脱下的皮肤的Id" << endl;
+		cin >> i64SkinId;
+		if (!g_CardSystem.Drop(i64UserId, i64CardId, i64SkinId))
+			cout << "皮肤脱下失败" << endl;
+		else
+			cout << "皮肤脱下成功" << endl;
+	}break;
+	case 11: {
+		long long int i64UserId;
+		unsigned int unSkinType;
+		cout << "请输入指定玩家的Id" << endl;
+		cin >> i64UserId;
+		cout << "请输入要获取的皮肤的类型" << endl;
+		cin >> unSkinType;
+		if (!g_CardSystem.AddSkin(i64UserId, unSkinType))
+			cout << "皮肤获取失败" << endl;
+		else
+			cout << "皮肤获取成功" << endl;
+	}break;
+	case 12: {
+		long long int i64UserId;
+		cout << "请输入指定玩家的Id" << endl;
+		cin >> i64UserId;
+		if (!g_CardSystem.ShowSkin(i64UserId))
+			cout << "皮肤展示失败" << endl;
+		else
+			cout << "皮肤展示成功" << endl;
+	}break;
 	default:return false;
 		break;
 	}
@@ -121,16 +168,16 @@ bool Subject(int nchoice) {
 }
 int main() {
 	Init();
-	/*bool bContinue = true;
+	bool bContinue = true;
 	while (bContinue) {
 		system("cls");
-		cout << "请选择功能:\n1.登入\n2.注销\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级" << endl;
+		cout << "请选择功能:\n1.登入\n2.注销\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级\n9.给玩家卡牌穿上皮肤\n10.从玩家卡牌脱下皮肤\n11.给玩家增加皮肤\n12.显示玩家拥有的所有皮肤" << endl;
 		int nchoice = 1;
 		cin >> nchoice;
 		getchar();
 		bContinue = Subject(nchoice);
 		system("pause");
-	}*/
+	}
 
 	return 0;
 }

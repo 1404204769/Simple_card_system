@@ -6,7 +6,7 @@ CCardSystem::CCardSystem() {
 CCardSystem::~CCardSystem() {
 	Log("调用了CCardSystem析构函数\n");
 }
-bool CCardSystem::Add(const std::string& strUserAccount,const unsigned int unCardType) {
+bool CCardSystem::AddCard(const std::string& strUserAccount,const unsigned int unCardType) {
 	/*为指定玩家增加一副指定的卡牌*/
 
 	long long int i64UserId = g_UserMgr.GetOnlineId(strUserAccount);
@@ -33,7 +33,7 @@ bool CCardSystem::Add(const std::string& strUserAccount,const unsigned int unCar
 	return true;
 
 }
-bool CCardSystem::Del(const std::string& strUserAccount,const long long int i64CardId) {
+bool CCardSystem::DelCard(const std::string& strUserAccount,const long long int i64CardId) {
 	/*为指定玩家删除指定卡牌*/
 	long long int i64UserId = g_UserMgr.GetOnlineId(strUserAccount);
 	if (i64UserId == 0) {
@@ -79,7 +79,7 @@ bool CCardSystem::CardLevUp(const std::string& strUserAccount, const long long i
 	}
 	return true;
 }
-bool CCardSystem::Show(const std::string& strUserAccount) {
+bool CCardSystem::ShowCard(const std::string& strUserAccount) {
 	/*打印显示指定用户的所有卡牌*/
 	long long int i64UserId = g_UserMgr.GetOnlineId(strUserAccount);
 	if (i64UserId == 0) {
@@ -97,7 +97,7 @@ bool CCardSystem::Show(const std::string& strUserAccount) {
 	CardMgr.PrintAll();
 	return true;
 }
-bool CCardSystem::ShowAtk(const std::string& strUserAccount,const long long int i64CardId) {
+bool CCardSystem::ShowCardAtk(const std::string& strUserAccount,const long long int i64CardId) {
 	/*打印显示指定用户的指定卡牌的攻击力*/
 	long long int i64UserId = g_UserMgr.GetOnlineId(strUserAccount);
 	if (i64UserId == 0) {
@@ -110,15 +110,84 @@ bool CCardSystem::ShowAtk(const std::string& strUserAccount,const long long int 
 		cout << "指定用户未登入，请登入后操作" << endl;
 		return false;
 	}
-
-	CCardMgr &CardMgr = pUser->GetCardMgr();
+	CSkinMgr& SkinMgr = pUser->GetSkinMgr();
+	CCardMgr& CardMgr = pUser->GetCardMgr();
 	CCard* pCard= CardMgr.Get(i64CardId);
 	if (!pCard) {
 		cout << "指定卡牌不存在" << endl;
 		return false;
 	}
+	long long int Atk = 0;
 	const CCardType &CardType = pCard->GetCardTypeData();
 	const CCardLevAttrType& CardLevAttrType = pCard->GetCardLevAttrTypeData();
-	cout << "指定卡牌攻击力为：" <<CardType.GetAtk()+CardLevAttrType.GetAtk() << endl;
+	Atk += CardType.GetAtk() + CardLevAttrType.GetAtk();
+
+	if (pCard->GetSkinId()) {
+		CSkin* pSkin = SkinMgr.Get(pCard->GetSkinId());
+		if (!pSkin) {
+			cout << "皮肤数据发生错误" << endl;
+			return false;
+		}
+		unsigned int SkinType = pSkin->GetSkinType();
+		const CSkinType* pSkinType = g_SkinTypeMgr.Get(SkinType);
+		if (!pSkinType) {
+			cout << "皮肤类型数据发生错误" << endl;
+			return false;
+		}
+		Atk += pSkinType->GetAtk();
+	}
+	cout << "指定卡牌攻击力为：" <<Atk<< endl;
+	return true;
+}
+
+
+bool CCardSystem::Wear(const long long int i64UserId, const long long int i64CardId, const long long int  i64SkinId) {
+	/*指定用户指定卡牌穿指定皮肤*/
+	CUser* pUser = g_UserMgr.Get(i64UserId);
+	if (!pUser) {
+		cout << "指定用户未登入，请登入后操作" << endl;
+		return false;
+	}
+
+	CSkinMgr& SkinMgr = pUser->GetSkinMgr();
+	return SkinMgr.Wear(i64CardId, i64SkinId);
+}
+bool CCardSystem::Drop(const long long int i64UserId, const long long int i64CardId, const long long int  i64SkinId) {
+	/*指定用户指定卡牌脱指定皮肤*/
+	CUser* pUser = g_UserMgr.Get(i64UserId);
+	if (!pUser) {
+		cout << "指定用户未登入，请登入后操作" << endl;
+		return false;
+	}
+
+	CSkinMgr& SkinMgr = pUser->GetSkinMgr();
+	return SkinMgr.Drop(i64CardId, i64SkinId);
+}
+bool CCardSystem::AddSkin(const long long int i64UserId, const unsigned int unSkinType) {
+	/*指定用户获得指定类型指定皮肤*/
+	CUser* pUser = g_UserMgr.Get(i64UserId);
+	if (!pUser) {
+		cout << "指定用户未登入，请登入后操作" << endl;
+		return false;
+	}
+	CSkinMgr& SkinMgr = pUser->GetSkinMgr();
+	const CSkinType* pSkinType = g_SkinTypeMgr.Get(unSkinType);
+	if (!pSkinType) {
+		cout << "指定皮肤类型无效" << endl;
+		return false;
+	}
+	return SkinMgr.Add(i64UserId, pSkinType);
+}
+bool CCardSystem::ShowSkin(const long long int i64UserId) {
+	/*展示用户拥有的所有皮肤*/
+
+	CUser* pUser = g_UserMgr.Get(i64UserId);
+	if (!pUser) {
+		cout << "指定用户未登入，请登入后操作" << endl;
+		return false;
+	}
+
+	CSkinMgr& SkinMgr = pUser->GetSkinMgr();
+	SkinMgr.PrintAll();
 	return true;
 }

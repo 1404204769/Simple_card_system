@@ -1,11 +1,11 @@
 #include "User.h"
 #include "CardMgr.h"
+#include "SkinMgr.h"
 using namespace std;
 CUser::CUser(const std::string& _strAccount) {
 	m_strAccount = _strAccount;
 	Log("调用了CUser构造函数\n");
 }
-
 CUser::~CUser()
 {
 	Log( "调用了CUser的析构函数\n");
@@ -14,8 +14,11 @@ CUser::~CUser()
 		Log("用户数据保存失败\n");
 	else
 		Log("用户数据保存成功\n");
+
 	delete m_pCardMgr;
 	m_pCardMgr = nullptr;
+	delete m_pSkinMgr;
+	m_pSkinMgr = nullptr;
 }
 
 
@@ -41,6 +44,12 @@ CCardMgr& CUser::GetCardMgr() const{
 	assert(m_pCardMgr);
 
 	return *m_pCardMgr;
+}
+
+CSkinMgr& CUser::GetSkinMgr() const {
+	assert(m_pSkinMgr);
+
+	return *m_pSkinMgr;
 }
 void CUser::SetLev(const unsigned int _unLev) {
 	m_unLev = _unLev;
@@ -203,8 +212,16 @@ bool CUser::Init(const mysqlpp::Row& row) {
 		m_i64Exp = row["exp"];
 		m_unLev = row["lev"];
 		m_i64Id = row["id"];
-		m_pCardMgr = new CCardMgr();
+		m_pSkinMgr = new CSkinMgr();
 
+		if (!m_pSkinMgr->Init(this)) {
+			cout << "用户拥有的皮肤加载失败" << endl;
+			delete m_pSkinMgr;
+			m_pSkinMgr = nullptr;
+			return false;
+		}
+
+		m_pCardMgr = new CCardMgr();
 		if (!m_pCardMgr->Init(this)) {
 			cout << "用户拥有的卡牌加载失败" << endl;
 			delete m_pCardMgr;

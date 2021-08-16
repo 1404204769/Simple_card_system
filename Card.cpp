@@ -22,19 +22,23 @@ bool CCard::CreateNewCard(const long long int i64UserId, const CCardType* pCardT
 		cout << "卡牌类型无效，新建卡牌失败" << endl;
 		return false;
 	}
+
 	if (i64UserId<=0) {
 		cout << "用户ID不合法" << endl;
 		return false;
 	}
+
 	if (!SetLevel(1)) {/*初始等级为0*/
 		cout << "卡牌等级无效" << endl;
 		return false;
 	}
+
 	m_i64UserId = i64UserId;
 	m_unCardType = pCardType->GetCardType();
 	m_strName = pCardType->GetName();
 	m_i64Exp = 0;
 	m_pCardType = pCardType;
+
 	if (!Insert(m_i64CardId)) {
 		cout << "新卡牌插入数据库失败" << endl;
 		return false;
@@ -47,25 +51,29 @@ bool CCard::CreateFromDB(const mysqlpp::Row& row, const CCardType* pCardType) {
 	{
 		if (!row) 
 		{
-			Log("初始化用户失败\n");//打印在控制台
+			Log("初始化卡牌失败\n");//打印在控制台
 			return false;
-		}/*否则说明找打对应数据，将其映射到CUser对象上*/
+		}/*否则说明找到对应数据，将其映射到Card对象上*/
 
 		if (!pCardType)
 		{
 			cout << "卡牌类型无效，新建卡牌失败" << endl;
 			return false;
 		}
+
 		m_unCardType = row["card_type"];
 		if (m_unCardType != pCardType->GetCardType())
 		{
 			cout << "卡牌类型不匹配，新建卡牌失败" << endl;
 			return false;
 		}
+
 		if (!SetLevel(row["lev"])) {
 			cout << "卡牌等级无效" << endl;
 			return false;
 		}
+
+		SetSkinId(row["skin_id"]);
 		m_i64CardId = row["id"];
 		m_i64UserId = row["user_id"];
 		m_strName = row["name"];
@@ -112,6 +120,10 @@ long long int CCard::GetUserId() const{
 	/*获取m_i64UserId*/
 	return m_i64UserId;
 }
+long long int CCard::GetSkinId() const {
+	/*获取m_i64SkinId*/
+	return m_i64SkinId;
+}
 long long int CCard::GetExp() const{
 	/*获取m_i64Exp*/
 	return m_i64Exp;
@@ -135,14 +147,22 @@ bool CCard::LevelUp(unsigned int unLev) {
 bool CCard::SetLevel(unsigned int unLev) {
 	if (unLev <= 0)
 		return false;
+
 	const CCardLevAttrType* pCardLevAttrType = g_CardLevAttrTypeMgr.Get(unLev);
 	if (!pCardLevAttrType) {
 		cout << "卡牌等级超出限制" << endl;
 		return false;
 	}
+
 	m_pCardLevAttrType = pCardLevAttrType;
 	m_unLev = unLev;
 	return true;
+}
+void CCard::SetSkinId(long long int i64SkinId) {
+	/*设置穿戴的皮肤*/
+	assert(i64SkinId >= 0);
+
+	m_i64SkinId = i64SkinId;
 }
 /*
 * 以下是数据库层相关接口
@@ -151,7 +171,6 @@ bool CCard::SetLevel(unsigned int unLev) {
 
 bool CCard::Insert(long long int& i64CardId_Out) {
 	/*将Card数据插入数据库*/
-	/*在数据库中插入新的User数据*/
 	try
 	{
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
@@ -160,7 +179,7 @@ bool CCard::Insert(long long int& i64CardId_Out) {
 			return false;
 		}
 
-		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev)";
+		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,0,%2q:name,%3q:exp,%4q:lev)";
 		pQuery->parse();
 		pQuery->template_defaults["user_id"] = m_i64UserId;
 		pQuery->template_defaults["card_type"] = m_unCardType;
@@ -262,9 +281,10 @@ bool CCard::Update() {
 			return false;
 		}
 
-		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev where id = %4q:CardId;";
+		*pQuery << "update `d_card` set user_id=%0q:UserId,skin_id=%1q:SkinId,`name`=%2q:Name,exp=%3q:Exp,lev=%4q:Lev where id = %5q:CardId;";
 		pQuery->parse();
 		pQuery->template_defaults["UserId"] = m_i64UserId;
+		pQuery->template_defaults["SkinId"] = m_i64SkinId;
 		pQuery->template_defaults["Name"] = m_strName.c_str();
 		pQuery->template_defaults["Exp"] = m_i64Exp;
 		pQuery->template_defaults["Lev"] = m_unLev;
