@@ -60,6 +60,9 @@ mysqlpp::Query* CDB::GetQuery() {
 
 		Log("调用CDB::getQuery()获取Query成功\n");
 		m_pQuery->reset();
+
+		assert(m_pQuery);
+
 		return m_pQuery;
 	}
 	catch (const mysqlpp::BadQuery& er) {

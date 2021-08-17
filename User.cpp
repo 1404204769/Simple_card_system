@@ -16,9 +16,7 @@ CUser::~CUser()
 		Log("用户数据保存成功\n");
 
 	delete m_pCardMgr;
-	m_pCardMgr = nullptr;
 	delete m_pSkinMgr;
-	m_pSkinMgr = nullptr;
 }
 
 
@@ -212,14 +210,6 @@ bool CUser::Init(const mysqlpp::Row& row) {
 		m_i64Exp = row["exp"];
 		m_unLev = row["lev"];
 		m_i64Id = row["id"];
-		m_pSkinMgr = new CSkinMgr();
-
-		if (!m_pSkinMgr->Init(this)) {
-			cout << "用户拥有的皮肤加载失败" << endl;
-			delete m_pSkinMgr;
-			m_pSkinMgr = nullptr;
-			return false;
-		}
 
 		m_pCardMgr = new CCardMgr();
 		if (!m_pCardMgr->Init(this)) {
@@ -228,6 +218,14 @@ bool CUser::Init(const mysqlpp::Row& row) {
 			m_pCardMgr = nullptr;
 			return false;
 		}
+		m_pSkinMgr = new CSkinMgr();
+		if (!m_pSkinMgr->Init(this)) {
+			cout << "用户拥有的皮肤加载失败" << endl;
+			delete m_pSkinMgr;
+			m_pSkinMgr = nullptr;
+			return false;
+		}
+
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		Log("CUser::InitUser()  Query error: " +string( er.what() )+ "\n");

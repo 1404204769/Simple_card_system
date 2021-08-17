@@ -43,7 +43,7 @@ bool CCardMgr::Init(CUser* pUser) {
 			return false;
 		}
 		Log("CCardMgr::Init()  从数据库查询用户卡牌数据成功\n");
-		CSkinMgr &SkinMgr = m_pUser->GetSkinMgr();
+
 		while (row = res.fetch_row()) {
 			unique_ptr<CCard> pCard(new CCard());
 			if (!pCard) {
@@ -59,14 +59,8 @@ bool CCardMgr::Init(CUser* pUser) {
 				Log("CCardMgr::Init()  卡牌类型初始化失败\n");//打印在控制台
 				return false;
 			}
-			long long int i64SkinId = pCard->GetSkinId();
-			pCard->SetSkinId(0);
-			long long int i64CardId = pCard->GetCardId();
-			m_mapByCardId[pCard->GetCardId()] = pCard.release();
-			if (i64SkinId != 0&& !SkinMgr.Wear(i64CardId, i64SkinId)) {
-				cout << "用户卡牌初始化穿戴皮肤发生错误" << endl;
-				return false;
-			}
+			const long long int i64CardInt = pCard->GetCardId();
+			m_mapByCardId.insert({ i64CardInt,pCard.release() });
 		}
 
 	}
@@ -95,6 +89,8 @@ CCard* CCardMgr::Get(const long long int _i64CardId) {
 		cout << "Do not Find CardId:" << _i64CardId << endl;
 		return nullptr;
 	}
+	assert(iterById->second);
+
 	return iterById->second;
 }
 void CCardMgr::PrintAll() {
@@ -104,39 +100,36 @@ void CCardMgr::PrintAll() {
 		return;
 	}
 	CSkinMgr& SkinMgr = m_pUser->GetSkinMgr();
-	CardMapIter iterById = m_mapByCardId.begin();
-	while (iterById != m_mapByCardId.end()) {
-		CCard* pCard = iterById->second;
-		iterById++;
+	for(auto &iter:m_mapByCardId) {
+		CCard* pCard = iter.second;
 		if (!pCard) {
 			continue;
 		}
+		const long long int i64CardId = pCard->GetCardId();
+		CSkin* pSkin = SkinMgr.GetWearing(i64CardId);
 		const CCardType& CardType = pCard->GetCardTypeData();
 		const CCardLevAttrType& CardLevAttrType = pCard->GetCardLevAttrTypeData();
-		long long int Hp = 0, Mp = 0, Atk = 0;
-		string strSkinName = "无";
-		if (pCard->GetSkinId()) {
-			CSkin* pSkin = SkinMgr.Get(pCard->GetSkinId());
-			if (!pSkin) {
-				cout << "皮肤数据发生错误" << endl;
-				continue;
-			}
+
+		long long int i64Hp = 0, i64Mp = 0, i64Atk = 0;
+		string strSkinName = "无\t";
+
+		if (pSkin) {
 			unsigned int SkinType = pSkin->GetSkinType();
 			const CSkinType* pSkinType = g_SkinTypeMgr.Get(SkinType);
 			if (!pSkinType) {
 				cout << "皮肤类型数据发生错误" << endl;
 				continue;
 			}
-			Hp += pSkinType->GetHp();
-			Mp += pSkinType->GetMp();
-			Atk += pSkinType->GetAtk();
+			i64Hp += pSkinType->GetHp();
+			i64Mp += pSkinType->GetMp();
+			i64Atk += pSkinType->GetAtk();
 			strSkinName = pSkinType->GetName();
 		}
-		Hp += CardType.GetHp() + CardLevAttrType.GetHp();
-		Mp += CardType.GetMp() + CardLevAttrType.GetMp();
-		Atk+= CardType.GetAtk() + CardLevAttrType.GetAtk();
-		cout << "CardID:" << pCard->GetCardId() << "\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName() <<"\tSkin:"<<strSkinName
-			<< "\tLev:" << pCard->GetLev() << "\tExp:" << pCard->GetExp() << "\tHp:" << Hp << "\tMp:" << Mp << "\tAtk:" << Atk << endl;
+		i64Hp += CardType.GetHp() + CardLevAttrType.GetHp();
+		i64Mp += CardType.GetMp() + CardLevAttrType.GetMp();
+		i64Atk += CardType.GetAtk() + CardLevAttrType.GetAtk();
+		cout << "CardID:" << i64CardId << "\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName() <<"\tSkin:"<<strSkinName
+			<< "\tLev:" << pCard->GetLev() << "\tExp:" << pCard->GetExp() << "\tHp:" << i64Hp << "\tMp:" << i64Mp << "\tAtk:" << i64Atk << endl;
 	}
 }
 bool CCardMgr::Add(const CCardType* pCardType) {
@@ -157,13 +150,13 @@ bool CCardMgr::Add(const CCardType* pCardType) {
 		cout << "Card实体化失败" << endl;
 		return false;
 	}
-
-	if (!pCard->CreateNewCard(m_pUser->GetId(),pCardType)) {
+	const long long int i64UserId = m_pUser->GetId();
+	if (!pCard->CreateNewCard(i64UserId,pCardType)) {
 		cout << "卡牌数据初始化失败，增加卡牌失败" << endl;
 		return false;
 	}
-
-	m_mapByCardId[pCard->GetCardId()] = pCard.release();
+	const long long int i64CardId = pCard->GetCardId();
+	m_mapByCardId.insert({ i64CardId, pCard.release() });
 	return true;
 }
 bool CCardMgr::Del(long long int i64CardId) {
@@ -173,12 +166,20 @@ bool CCardMgr::Del(long long int i64CardId) {
 		return false;
 	}
 
-	CCard* pCard = m_mapByCardId[i64CardId];
-	m_mapByCardId[i64CardId] = nullptr;
+	CCard* pCard = nullptr;
+	if(m_mapByCardId.count(i64CardId))
+		pCard=m_mapByCardId[i64CardId];
 
 	if (!pCard) {
 		cout << "删除失败，该玩家没有这张叫做（"<< i64CardId <<"）的卡牌" << endl;
 		return false;
+	}
+
+	CSkinMgr& SkinMgr = m_pUser->GetSkinMgr();
+	CSkin* pSkin = SkinMgr.GetWearing(i64CardId);
+	if (pSkin) {
+		const long long int i64SkinId = pSkin->GetSkinId();
+		SkinMgr.Drop(i64CardId, i64SkinId);
 	}
 
 	m_mapByCardId.erase(i64CardId);
@@ -192,33 +193,34 @@ bool CCardMgr::Del(long long int i64CardId) {
 }
 bool CCardMgr::DelAll() {
 	/*删除所有的卡牌*/
-	bool bRet = true;
-	CardMapIter iterByName = m_mapByCardId.begin();
-	while (iterByName != m_mapByCardId.end()) {
-		CCard* pCard = iterByName->second;
-		iterByName->second = nullptr;
-		iterByName++;
+	bool ret = true;
+	for (auto &iter:m_mapByCardId) {
+		CCard* pCard = iter.second;
 		if (!pCard) {
-			bRet = false;
+			ret = false;
 			continue;
 		}	
+		const long long int i64CardId = pCard->GetCardId();
+		CSkinMgr& SkinMgr = m_pUser->GetSkinMgr();
+		CSkin* pSkin = SkinMgr.GetWearing(i64CardId);
+		const long long int i64SkinId = pSkin->GetSkinId();
+		if (pSkin) {
+			SkinMgr.Drop(i64CardId, i64SkinId);
+		}
 
 		if (!pCard->Delete()) {
 			cout << "卡牌删除失败" << endl;
-			bRet = false;
+			ret = false;
 		}
 		delete pCard;
 	}
 	m_mapByCardId.clear();
-	return bRet;
+	return ret;
 }
 void CCardMgr::Free() {
 	/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
-	CardMapIter iterByName = m_mapByCardId.begin();
-	while (iterByName != m_mapByCardId.end()) {
-		delete iterByName->second;//先释放内存
-		iterByName->second = nullptr;//置空
-		iterByName++;
+	for (auto &iter:m_mapByCardId) {
+		delete iter.second;//先释放内存
 	}
 	m_mapByCardId.clear();
 }

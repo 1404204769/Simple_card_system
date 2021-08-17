@@ -17,14 +17,14 @@ const CCardType* CCardTypeMgr::Get(unsigned int _unType) {
 		cout << "Do not Find CardTypeID:" << _unType << endl;
 		return nullptr;
 	}
+	assert(iterByType->second);
+
 	return iterByType->second;
 }
 void CCardTypeMgr::PrintAll() {
 	/*打印显示所有卡牌类型*/
-	CardTypeMapIter iterByType = m_mapByType.begin();
-	while (iterByType != m_mapByType.end()) {
-		const CCardType* pCardType = iterByType->second;
-		iterByType++;
+	for(auto &iter:m_mapByType) {
+		const CCardType* pCardType = iter.second;
 		if (!pCardType) {
 			continue;
 		}
@@ -54,8 +54,7 @@ bool CCardTypeMgr::Init() {
 		}
 		Log("CCardTypeMgr::Init()  从数据库加载卡牌池成功\n");
 
-		mysqlpp::Row row;
-		while (row = res.fetch_row()) {
+		while (mysqlpp::Row row = res.fetch_row()) {
 			unique_ptr<CCardType>  pCardType(new CCardType());
 			if (!pCardType) {
 				Log("CCardTypeMgr::Init()  卡牌类型实体化失败\n");//打印在控制台
@@ -65,7 +64,8 @@ bool CCardTypeMgr::Init() {
 				Log("CCardTypeMgr::Init()  卡牌类型初始化失败\n");//打印在控制台
 				return false;
 			}
-			m_mapByType[pCardType->GetCardType()] = pCardType.release();
+			const unsigned int unCardType = pCardType->GetCardType();
+			m_mapByType.insert({ unCardType , pCardType.release()});
 		}
 	}
 	catch (const mysqlpp::BadQuery& er) {
@@ -89,11 +89,8 @@ bool CCardTypeMgr::Init() {
 }
 void CCardTypeMgr::Free() {
 	/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
-	CardTypeMapIter iterByType = m_mapByType.begin();
-	while (iterByType != m_mapByType.end()) {
-		delete iterByType->second;//先释放内存
-		iterByType->second = nullptr;//置空
-		iterByType++;
+	for(auto &iter:m_mapByType) {
+		delete iter.second;//先释放内存
 	}
 	m_mapByType.clear();
 }

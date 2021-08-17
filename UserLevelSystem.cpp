@@ -20,9 +20,9 @@ bool CUserLevelSystem::LevelUp() {
 	}
 
 	cout << "请输入要升的等级:";
-	unsigned int unLev;
+	unsigned int unLev,unOldLev= pUser->GetLev();
 	cin >> unLev;
 
-	pUser->SetLev(pUser->GetLev() + unLev);
+	pUser->SetLev(unOldLev + unLev);
 	return true;
 }

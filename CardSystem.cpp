@@ -117,17 +117,12 @@ bool CCardSystem::ShowCardAtk(const std::string& strUserAccount,const long long 
 		cout << "指定卡牌不存在" << endl;
 		return false;
 	}
+	CSkin* pSkin = SkinMgr.GetWearing(pCard->GetCardId());
 	long long int Atk = 0;
 	const CCardType &CardType = pCard->GetCardTypeData();
 	const CCardLevAttrType& CardLevAttrType = pCard->GetCardLevAttrTypeData();
 	Atk += CardType.GetAtk() + CardLevAttrType.GetAtk();
-
-	if (pCard->GetSkinId()) {
-		CSkin* pSkin = SkinMgr.Get(pCard->GetSkinId());
-		if (!pSkin) {
-			cout << "皮肤数据发生错误" << endl;
-			return false;
-		}
+	if (pSkin) {
 		unsigned int SkinType = pSkin->GetSkinType();
 		const CSkinType* pSkinType = g_SkinTypeMgr.Get(SkinType);
 		if (!pSkinType) {
@@ -176,7 +171,7 @@ bool CCardSystem::AddSkin(const long long int i64UserId, const unsigned int unSk
 		cout << "指定皮肤类型无效" << endl;
 		return false;
 	}
-	return SkinMgr.Add(i64UserId, pSkinType);
+	return SkinMgr.AddNew(pSkinType);
 }
 bool CCardSystem::ShowSkin(const long long int i64UserId) {
 	/*展示用户拥有的所有皮肤*/

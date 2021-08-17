@@ -8,6 +8,7 @@ CSkin::CSkin() {
 CSkin::~CSkin() {
 	/*析构函数*/
 	Log("调用了CCard析构函数\n");
+	Update();
 }
 
 bool CSkin::CreateNewSkin(const long long int i64UserId, const CSkinType* pSkinType) {
@@ -56,7 +57,7 @@ bool CSkin::CreateFromDB(const mysqlpp::Row& row, const CSkinType* pSkinType) {
 			return false;
 		}
 
-		m_i64CardId = 0;
+		m_i64CardId = row["card_id"];
 		m_i64UserId = row["user_id"];
 		m_i64SkinId = row["id"];
 
@@ -104,16 +105,12 @@ bool CSkin::IsWear()const {
 
 bool CSkin::Wear(CCard& Card) {
 	/*穿上某个皮肤*/
-	if (!IsWear()) {//如果还没被穿
-		if (Card.GetSkinId()) {//目标卡牌也还没穿任何皮肤
-			cout << "皮肤ID" << m_i64SkinId << "穿戴失败" << endl;
-			return false;
-		}
-		Card.SetSkinId(m_i64SkinId);
-		m_i64CardId = Card.GetCardId();
-		return true;
+	if (IsWear()) {//如果还没被穿
+		cout << "皮肤ID:" << m_i64SkinId << "已经被别的卡牌(ID: " << m_i64CardId << ")穿上" << endl;
+		return false;
 	}
-	return false;
+	m_i64CardId = Card.GetCardId();
+	return true;
 }
 bool CSkin::Drop(CCard& Card) {
 	/*脱下某个皮肤*/
@@ -121,17 +118,10 @@ bool CSkin::Drop(CCard& Card) {
 		cout << "皮肤ID:"<< m_i64SkinId <<"还没被穿上" << endl;
 		return false;
 	}
-
 	if (m_i64CardId != Card.GetCardId()) {
 		cout << "皮肤ID:" << m_i64SkinId << " 穿在卡牌ID："<< m_i64CardId <<"  其余卡牌不得对其操作" << endl;
 		return false;
 	}
-
-	if (Card.GetSkinId()==0) {
-		cout << "皮肤ID" << m_i64SkinId << "脱下失败" << endl;
-		return false;
-	}
-	Card.SetSkinId(0);
 	m_i64CardId = 0;
 	return true;
 }
@@ -195,9 +185,10 @@ bool CSkin::Insert(long long int& i64SkinId_Out) {
 			return false;
 		}
 
-		*pQuery << "insert into d_skin values(0,%0q:user_id, %1q:skin_type)";
+		*pQuery << "insert into d_skin values(0,%0q:user_id, %1q:card_id, %2q:skin_type)";
 		pQuery->parse();
 		pQuery->template_defaults["user_id"] = m_i64UserId;
+		pQuery->template_defaults["card_id"] = m_i64CardId;
 		pQuery->template_defaults["skin_type"] = m_unSkinType;
 		
 		Log("Query:" + pQuery->str() + "\n");
@@ -224,6 +215,49 @@ bool CSkin::Insert(long long int& i64SkinId_Out) {
 	}
 	catch (const mysqlpp::Exception& er) {
 		Log("CSkin::Insert()  Error: " + string(er.what()) + "\n");
+		return false;
+	}
+	return true;
+}
+bool CSkin::Update() {
+	/*将最新的数据更新到数据库*/
+	try
+	{
+		Log("CSkin::Update()\n");
+		mysqlpp::Query* pQuery = g_DB.GetQuery();
+		if (!*pQuery) {
+			Log("CSkin::Update()  Query对象不存在，无法更新数据\n");
+			return false;
+		}
+
+		*pQuery << "update `d_skin` set user_id=%0q:UserId,card_id=%1q:CardId,skin_type=%2q:SkinType where id=%3q:id;";
+		pQuery->parse();
+		pQuery->template_defaults["UserId"] = m_i64UserId;
+		pQuery->template_defaults["CardId"] = m_i64CardId;
+		pQuery->template_defaults["SkinType"] = m_unSkinType;
+		pQuery->template_defaults["id"] = m_i64SkinId;
+
+		Log("Query:" + pQuery->str() + "\n");
+		if (!g_DB.Update(*pQuery)) {
+			Log("CSkin::Update()向数据库更新皮肤失败\n");
+			return false;
+		}
+		Log("CSkin::Update()向数据库更新皮肤成功\n");
+	}
+	catch (const mysqlpp::BadQuery& er) {
+		Log("CSkin::Update()  Query error: " + string(er.what()) + "\n");
+		return false;
+	}
+	catch (const mysqlpp::BadConversion& er) {
+		Log("CSkin::Update()  Conversion error: " + string(er.what()) + ",tretrieved data size: " + to_string(er.retrieved) + ", actual size: " + to_string(er.actual_size) + "\n");
+		return false;
+	}
+	catch (const mysqlpp::BadIndex& er) {
+		Log("CSkin::Update()  Error: " + string(er.what()) + "\n");
+		return false;
+	}
+	catch (const mysqlpp::Exception& er) {
+		Log("CSkin::Update()  Error: " + string(er.what()) + "\n");
 		return false;
 	}
 	return true;

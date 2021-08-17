@@ -4,7 +4,6 @@ CCard::CCard() {
 	/*构造函数*/
 	Log("调用了CCard构造函数\n");
 }
-
 CCard::~CCard(){
 	/*析构函数*/
 	Log("调用了CCard析构函数\n");
@@ -73,7 +72,6 @@ bool CCard::CreateFromDB(const mysqlpp::Row& row, const CCardType* pCardType) {
 			return false;
 		}
 
-		SetSkinId(row["skin_id"]);
 		m_i64CardId = row["id"];
 		m_i64UserId = row["user_id"];
 		m_strName = row["name"];
@@ -120,10 +118,6 @@ long long int CCard::GetUserId() const{
 	/*获取m_i64UserId*/
 	return m_i64UserId;
 }
-long long int CCard::GetSkinId() const {
-	/*获取m_i64SkinId*/
-	return m_i64SkinId;
-}
 long long int CCard::GetExp() const{
 	/*获取m_i64Exp*/
 	return m_i64Exp;
@@ -158,12 +152,6 @@ bool CCard::SetLevel(unsigned int unLev) {
 	m_unLev = unLev;
 	return true;
 }
-void CCard::SetSkinId(long long int i64SkinId) {
-	/*设置穿戴的皮肤*/
-	assert(i64SkinId >= 0);
-
-	m_i64SkinId = i64SkinId;
-}
 /*
 * 以下是数据库层相关接口
 */
@@ -179,7 +167,7 @@ bool CCard::Insert(long long int& i64CardId_Out) {
 			return false;
 		}
 
-		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,0,%2q:name,%3q:exp,%4q:lev)";
+		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev)";
 		pQuery->parse();
 		pQuery->template_defaults["user_id"] = m_i64UserId;
 		pQuery->template_defaults["card_type"] = m_unCardType;
@@ -281,10 +269,9 @@ bool CCard::Update() {
 			return false;
 		}
 
-		*pQuery << "update `d_card` set user_id=%0q:UserId,skin_id=%1q:SkinId,`name`=%2q:Name,exp=%3q:Exp,lev=%4q:Lev where id = %5q:CardId;";
+		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev where id = %4q:CardId;";
 		pQuery->parse();
 		pQuery->template_defaults["UserId"] = m_i64UserId;
-		pQuery->template_defaults["SkinId"] = m_i64SkinId;
 		pQuery->template_defaults["Name"] = m_strName.c_str();
 		pQuery->template_defaults["Exp"] = m_i64Exp;
 		pQuery->template_defaults["Lev"] = m_unLev;

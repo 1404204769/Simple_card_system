@@ -17,14 +17,14 @@ const CSkinType* CSkinTypeMgr::Get(unsigned int unId) {
 		cout << "Do not Find SkinTypeID:" << unId << endl;
 		return nullptr;
 	}
+	assert(iterById->second);
+
 	return iterById->second;
 }
 void CSkinTypeMgr::PrintAll() {
 	/*打印显示所有卡牌类型*/
-	SkinTypeMapIter iterById = m_mapSkinType.begin();
-	while (iterById != m_mapSkinType.end()) {
-		const CSkinType* pSkinType = iterById->second;
-		iterById++;
+	for(auto &iter:m_mapSkinType) {
+		const CSkinType* pSkinType = iter.second;
 		if (!pSkinType) {
 			continue;
 		}
@@ -55,8 +55,7 @@ bool CSkinTypeMgr::Init() {
 		}
 		Log("CSkinTypeMgr::Init()  从数据库加载卡牌池成功\n");
 
-		mysqlpp::Row row;
-		while (row = res.fetch_row()) {
+		while (mysqlpp::Row row = res.fetch_row()) {
 			unique_ptr<CSkinType>  pSkinType(new CSkinType());
 			if (!pSkinType) {
 				Log("CSkinTypeMgr::Init()  卡牌类型实体化失败\n");//打印在控制台
@@ -66,7 +65,8 @@ bool CSkinTypeMgr::Init() {
 				Log("CSkinTypeMgr::Init()  卡牌类型初始化失败\n");//打印在控制台
 				return false;
 			}
-			m_mapSkinType[pSkinType->GetId()] = pSkinType.release();
+			const unsigned int unSkinType = pSkinType->GetId();
+			m_mapSkinType.insert({ unSkinType ,pSkinType.release() });
 		}
 	}
 	catch (const mysqlpp::BadQuery& er) {
@@ -90,11 +90,8 @@ bool CSkinTypeMgr::Init() {
 }
 void CSkinTypeMgr::Free() {
 	/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
-	SkinTypeMapIter iterById = m_mapSkinType.begin();
-	while (iterById != m_mapSkinType.end()) {
-		delete iterById->second;//先释放内存
-		iterById->second = nullptr;//置空
-		iterById++;
+	for(auto &iter:m_mapSkinType) {
+		delete iter.second;//先释放内存
 	}
 	m_mapSkinType.clear();
 }

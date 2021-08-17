@@ -17,6 +17,8 @@ const CCardLevAttrType* CCardLevAttrTypeMgr::Get(unsigned int unLev) {
 		cout << "Do not Find CCardLevAttrTypeLev:" << unLev << endl;
 		return nullptr;
 	}
+	assert(iterByLev->second);
+
 	return iterByLev->second;
 }
 bool CCardLevAttrTypeMgr::Init() {
@@ -42,8 +44,8 @@ bool CCardLevAttrTypeMgr::Init() {
 		}
 		Log("CCardLevAttrTypeMgr::Init()  从数据库加载卡牌池成功\n");
 
-		mysqlpp::Row row;
-		while (row = res.fetch_row()) {
+		;
+		while (mysqlpp::Row row = res.fetch_row()) {
 			unique_ptr<CCardLevAttrType>  pCardLevAttrType(new CCardLevAttrType());
 			if (!pCardLevAttrType) {
 				Log("CCardLevAttrTypeMgr::Init()  卡牌类型实体化失败\n");//打印在控制台
@@ -53,7 +55,8 @@ bool CCardLevAttrTypeMgr::Init() {
 				Log("CCardLevAttrTypeMgr::Init()  卡牌类型初始化失败\n");//打印在控制台
 				return false;
 			}
-			m_mapByLev[pCardLevAttrType->GetCardLev()] = pCardLevAttrType.release();
+			const unsigned int unCardLev = pCardLevAttrType->GetCardLev();
+			m_mapByLev.insert({ unCardLev,pCardLevAttrType.release()});
 		}
 	}
 	catch (const mysqlpp::BadQuery& er) {
@@ -77,11 +80,8 @@ bool CCardLevAttrTypeMgr::Init() {
 }
 void CCardLevAttrTypeMgr::Free() {
 	/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
-	CardLevAttrTypeMapIter iterByLev = m_mapByLev.begin();
-	while (iterByLev != m_mapByLev.end()) {
-		delete iterByLev->second;//先释放内存
-		iterByLev->second = nullptr;//置空
-		iterByLev++;
+	for (auto& iter:m_mapByLev) {
+		delete iter.second;//先释放内存
 	}
 	m_mapByLev.clear();
 }

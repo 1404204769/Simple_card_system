@@ -72,7 +72,6 @@ bool CUserMgr::Del(const string& _strAccount) {
 		return false;
 	}
 	delete iterById->second;
-	iterById->second = nullptr;
 	m_mapById.erase(iterById);
 	return true;
 }
@@ -97,6 +96,8 @@ CUser* CUserMgr::Get(const long long int _i64Id) {
 		cout << "Do not Find ID:" << _i64Id << endl;
 		return nullptr;
 	}
+	assert(iterById->second);
+
 	return iterById->second;
 }
 long long int CUserMgr::GetOnlineId(const std::string& _strAccount) {/*»Áπ˚∑µªÿ“ª∏ˆ0Àµ√˜∏√”√ªß≤ª‘⁄œﬂ*/
@@ -108,10 +109,8 @@ long long int CUserMgr::GetOnlineId(const std::string& _strAccount) {/*»Áπ˚∑µªÿ“
 
 void CUserMgr::PrintOnline() {
 	/*¥Ú”°œ‘ æÀ˘”–‘⁄œﬂÕÊº“µƒ–≈œ¢*/
-	UserIdMapIter iterById = m_mapById.begin();
-	while (iterById != m_mapById.end()) {
-		CUser* pUser = iterById->second;
-		iterById++;
+	for(auto &iter:m_mapById) {
+		CUser* pUser = iter.second;
 		if (!pUser) {
 			continue;
 		}
@@ -127,12 +126,8 @@ void CUserMgr::PrintOnline() {
 
 void CUserMgr::Free() {
 	/*‘⁄Œˆππ∫Ø ˝÷–µ˜”√£¨ Õ∑≈ªπ‘⁄ƒ⁄¥Ê÷–µƒ ˝æ›£¨∑¿÷πƒ⁄¥Ê–π¬©“‘º∞ ˝æ›∂™ ß*/
-	UserAccountMapIter iterByAccount = m_mapByAccount.begin();
-	UserIdMapIter iterById = m_mapById.begin();
-	while (iterById != m_mapById.end()) {
-		delete iterById->second;//œ» Õ∑≈ƒ⁄¥Ê
-		iterById->second = nullptr;//÷√ø’
-		iterById++;
+	for (auto &iter:m_mapById) {
+		delete iter.second;//œ» Õ∑≈ƒ⁄¥Ê
 	}
 	m_mapByAccount.clear();
 	m_mapById.clear();

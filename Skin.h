@@ -29,8 +29,7 @@ public:
 	bool Delete();/*将Card数据从数据库删除*/
 private:
 	bool Insert(long long int& i64SkinId_Out);/*将Card数据插入数据库*/
-
-
+	bool Update();/*将最新的数据更新到数据库*/
 	unsigned int  m_unSkinType = 0;
 	long long int m_i64SkinId = 0, m_i64UserId = 0,m_i64CardId=0;
 };
