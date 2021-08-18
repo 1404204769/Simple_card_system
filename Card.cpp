@@ -31,7 +31,11 @@ bool CCard::CreateNewCard(const long long int i64UserId, const CCardType* pCardT
 		cout << "卡牌等级无效" << endl;
 		return false;
 	}
-
+	if (!SetRank(0)) {
+		/*初始阶级为0*/
+		cout << "卡牌阶级无效" << endl;
+		return false;
+	}
 	m_i64UserId = i64UserId;
 	m_unCardType = pCardType->GetCardType();
 	m_strName = pCardType->GetName();
@@ -71,7 +75,10 @@ bool CCard::CreateFromDB(const mysqlpp::Row& row, const CCardType* pCardType) {
 			cout << "卡牌等级无效" << endl;
 			return false;
 		}
-
+		if (!SetRank(row["rank_lev"])) {
+			cout << "卡牌阶级无效" << endl;
+			return false;
+		}
 		m_i64CardId = row["id"];
 		m_i64UserId = row["user_id"];
 		m_strName = row["name"];
@@ -106,6 +113,10 @@ unsigned int CCard::GetLev() const {
 	/*获取m_unLev*/
 	return m_unLev;
 }
+unsigned int CCard::GetCardRankLev() const {
+	/*获取m_unRankLev*/
+	return m_unRankLev;
+}
 unsigned int CCard::GetCardType() const{
 	/*获取m_unCardType*/
 	return m_unCardType;
@@ -133,10 +144,19 @@ const CCardLevAttrType& CCard::GetCardLevAttrTypeData() const {
 
 	return *m_pCardLevAttrType;
 }
+const CCardRankType& CCard::GetCardRankTypeData() const {
+	/*获取对应卡牌阶级的加成数据*/
+	assert(m_pCardRankType);
 
+	return *m_pCardRankType;
+}
 bool CCard::LevelUp(unsigned int unLev) {
 	/*提升卡牌等级，更换加成数据*/
 	return SetLevel(unLev + m_unLev);
+}
+bool CCard::RankUp() {
+	/*提升卡牌阶级，更换加成数据*/
+	return SetRank(m_unRankLev+1);
 }
 bool CCard::SetLevel(unsigned int unLev) {
 	if (unLev <= 0)
@@ -152,6 +172,22 @@ bool CCard::SetLevel(unsigned int unLev) {
 	m_unLev = unLev;
 	return true;
 }
+bool CCard::SetRank(unsigned int unRank) {
+	/*设置Rank等级*/
+	if (unRank <= 0)
+		return false;
+
+	const CCardRankType* pCardRankType = g_CardRankTypeMgr.Get(unRank);
+	if (!pCardRankType) {
+		cout << "卡牌阶级超出限制" << endl;
+		return false;
+	}
+
+	m_pCardRankType = pCardRankType;
+	m_unRankLev = unRank;
+	return true;
+}
+
 /*
 * 以下是数据库层相关接口
 */
@@ -167,13 +203,14 @@ bool CCard::Insert(long long int& i64CardId_Out) {
 			return false;
 		}
 
-		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev)";
+		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev，%5q:rank_lev)";
 		pQuery->parse();
 		pQuery->template_defaults["user_id"] = m_i64UserId;
 		pQuery->template_defaults["card_type"] = m_unCardType;
 		pQuery->template_defaults["name"] = m_strName.c_str();
 		pQuery->template_defaults["exp"] = m_i64Exp;
 		pQuery->template_defaults["lev"] = m_unLev;
+		pQuery->template_defaults["rank_lev"] = m_unRankLev;
 
 		Log("Query:" + pQuery->str() + "\n");
 

@@ -6,6 +6,7 @@
 #include "UserMgr.h"
 #include "DebugPrint.h"
 #include "CardTypeMgr.h"
+#include "CardRankTypeMgr.h"
 class CCardSystem
 {
 public:
@@ -22,6 +23,8 @@ public:
 	bool Drop(const long long int i64UserId, const long long int i64CardId, const long long int  i64SkinId);/*指定用户指定卡牌脱指定皮肤*/
 	bool AddSkin(const long long int i64UserId,const unsigned int unSkinType);/*指定用户获得指定类型指定皮肤*/
 	bool ShowSkin(const long long int i64UserId);/*展示用户拥有的所有皮肤*/
+
+	bool CardRankLevUp(const long long int i64UserId, const long long int i64CardId);/*为指定玩家的指定卡牌提升阶级*/
 };
 
 

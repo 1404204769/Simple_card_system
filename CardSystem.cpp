@@ -79,6 +79,77 @@ bool CCardSystem::CardLevUp(const std::string& strUserAccount, const long long i
 	}
 	return true;
 }
+bool CCardSystem::CardRankLevUp(const long long int i64UserId, const long long int i64CardId) {
+	/*为指定玩家的指定卡牌提升阶级*/
+
+	CUser* pUser = g_UserMgr.Get(i64UserId);
+	if (!pUser) {
+		cout << "指定用户未登入，请登入后操作" << endl;
+		return false;
+	}
+
+	CCardMgr& CardMgr = pUser->GetCardMgr();
+	CCard* pCard = CardMgr.Get(i64CardId);
+	if (!pCard) {
+		cout << "要升阶的主体卡牌不存在" << endl;
+		return false;
+	}
+
+	const unsigned int unRankLev = pCard->GetCardRankLev();
+
+	const CCardRankType* CardRandType = g_CardRankTypeMgr.Get(unRankLev+1);
+	if (!CardRandType) {
+		cout << "此卡牌已经无法升阶" << endl;
+		return false;
+	}
+	const unsigned int unCostNum = CardRandType->GetCostCardNum();
+	const unsigned int unCardType = pCard->GetCardType();
+	vector<long long int>vecConsume;
+
+	cout << "此次升阶需要消耗" << unCostNum << "张同类型同阶级卡牌" << endl;
+	cout << "请逐个输入要消耗的卡牌ID（若要取消升阶请输入0）" << endl;
+	for (unsigned int i = 0; i < unCostNum; i++) {
+		cout << "请输入第"<<i+1<<"个消耗品的ID: " << endl;
+		long long int i64ConCardId;
+		cin >> i64ConCardId;
+		if (i64ConCardId == 0) {
+			cout << "检测到取消升阶的操作，正在取消升阶" << endl;
+			vecConsume.clear();
+			return false;
+		}
+		CCard* pCard = CardMgr.Get(i64ConCardId);
+		if (!pCard) {
+			cout << "输入的卡牌ID是无效ID，请重新输入" << endl;
+			i--;
+			continue;
+		}
+		if (pCard->GetCardType() != unCardType) {
+			cout << "输入的卡牌ID所对应的卡牌的类型与升阶主体卡牌不同，请重新输入" << endl;
+			i--;
+			continue;
+		}
+		if (pCard->GetCardRankLev() != unRankLev) {
+			cout << "输入的卡牌ID所对应的卡牌的阶级与升阶主体卡牌不同，请重新输入" << endl;
+			i--;
+			continue;
+		}
+		vecConsume.push_back(i64ConCardId);
+	}
+	cout << "消耗品输入完毕，现在开始准备升阶" << endl;
+	if (vecConsume.size() != unCostNum) {
+		cout << "发生错误，消耗品数量不满足升阶条件" << endl;
+		vecConsume.clear();
+		return false;
+	}
+	for (auto iter : vecConsume) {
+		if (!CardMgr.Del(iter)) {
+			cout << "消耗品ID:"<<iter<<"消耗失败，升阶失败，已消耗的卡牌已报废" << endl;
+			return false;
+		}
+	}
+	pCard->RankUp();
+	return true;
+}
 bool CCardSystem::ShowCard(const std::string& strUserAccount) {
 	/*打印显示指定用户的所有卡牌*/
 	long long int i64UserId = g_UserMgr.GetOnlineId(strUserAccount);

@@ -1,141 +1,142 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\业务层">
-      <UniqueIdentifier>{1b886d22-181c-4b76-aaa1-30fe4e4bda1f}</UniqueIdentifier>
+    <Filter Include="主入口">
+      <UniqueIdentifier>{66ec937a-9d45-4b00-ad7a-204d43627efd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\业务层">
-      <UniqueIdentifier>{99069dea-d191-4d6d-8ee8-c590cafe14ec}</UniqueIdentifier>
+    <Filter Include="底层">
+      <UniqueIdentifier>{bbfae21c-f58e-4993-b283-6db1fd5fe5b3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\数据层">
-      <UniqueIdentifier>{c862643d-9207-4485-a33a-dcd4e2eeb679}</UniqueIdentifier>
+    <Filter Include="数据层">
+      <UniqueIdentifier>{13784fdf-3b52-4238-bae3-7573ed77d15f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\数据层">
-      <UniqueIdentifier>{271208e3-81cb-4417-80d6-a59f19b59671}</UniqueIdentifier>
+    <Filter Include="数据管理层">
+      <UniqueIdentifier>{f52a756d-7dd1-4ee7-9990-fb239613561d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\数据管理层">
-      <UniqueIdentifier>{b317aed8-e897-454d-b7f7-1368c54d8e41}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\数据管理层">
-      <UniqueIdentifier>{d918c8ec-813c-4ba5-82a4-bcdbdce98c27}</UniqueIdentifier>
+    <Filter Include="业务层">
+      <UniqueIdentifier>{785692e7-7841-4b0a-9906-91fa0a97254c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DB.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="DebugPrint.h">
-      <Filter>头文件</Filter>
+      <Filter>底层</Filter>
     </ClInclude>
-    <ClInclude Include="CardSystem.h">
-      <Filter>头文件\业务层</Filter>
-    </ClInclude>
-    <ClInclude Include="UserLevelSystem.h">
-      <Filter>头文件\业务层</Filter>
-    </ClInclude>
-    <ClInclude Include="LoginSystem.h">
-      <Filter>头文件\业务层</Filter>
+    <ClInclude Include="DB.h">
+      <Filter>底层</Filter>
     </ClInclude>
     <ClInclude Include="Card.h">
-      <Filter>头文件\数据层</Filter>
-    </ClInclude>
-    <ClInclude Include="CardType.h">
-      <Filter>头文件\数据层</Filter>
-    </ClInclude>
-    <ClInclude Include="User.h">
-      <Filter>头文件\数据层</Filter>
-    </ClInclude>
-    <ClInclude Include="CardTypeMgr.h">
-      <Filter>头文件\数据管理层</Filter>
-    </ClInclude>
-    <ClInclude Include="CardMgr.h">
-      <Filter>头文件\数据管理层</Filter>
-    </ClInclude>
-    <ClInclude Include="UserMgr.h">
-      <Filter>头文件\数据管理层</Filter>
-    </ClInclude>
-    <ClInclude Include="CardLevAttrType.h">
-      <Filter>头文件\数据层</Filter>
-    </ClInclude>
-    <ClInclude Include="CardLevAttrTypeMgr.h">
-      <Filter>头文件\数据管理层</Filter>
-    </ClInclude>
-    <ClInclude Include="SkinType.h">
-      <Filter>头文件\数据层</Filter>
-    </ClInclude>
-    <ClInclude Include="SkinTypeMgr.h">
-      <Filter>头文件\数据管理层</Filter>
+      <Filter>数据层</Filter>
     </ClInclude>
     <ClInclude Include="Skin.h">
-      <Filter>头文件\数据层</Filter>
+      <Filter>数据层</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinType.h">
+      <Filter>数据层</Filter>
+    </ClInclude>
+    <ClInclude Include="CardType.h">
+      <Filter>数据层</Filter>
+    </ClInclude>
+    <ClInclude Include="User.h">
+      <Filter>数据层</Filter>
+    </ClInclude>
+    <ClInclude Include="CardLevAttrType.h">
+      <Filter>数据层</Filter>
+    </ClInclude>
+    <ClInclude Include="CardLevAttrTypeMgr.h">
+      <Filter>数据管理层</Filter>
     </ClInclude>
     <ClInclude Include="SkinMgr.h">
-      <Filter>头文件\数据管理层</Filter>
+      <Filter>数据管理层</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinTypeMgr.h">
+      <Filter>数据管理层</Filter>
+    </ClInclude>
+    <ClInclude Include="CardTypeMgr.h">
+      <Filter>数据管理层</Filter>
+    </ClInclude>
+    <ClInclude Include="UserMgr.h">
+      <Filter>数据管理层</Filter>
+    </ClInclude>
+    <ClInclude Include="CardMgr.h">
+      <Filter>数据管理层</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginSystem.h">
+      <Filter>业务层</Filter>
+    </ClInclude>
+    <ClInclude Include="UserLevelSystem.h">
+      <Filter>业务层</Filter>
+    </ClInclude>
+    <ClInclude Include="CardSystem.h">
+      <Filter>业务层</Filter>
+    </ClInclude>
+    <ClInclude Include="CardRankType.h">
+      <Filter>数据层</Filter>
+    </ClInclude>
+    <ClInclude Include="CardRankTypeMgr.h">
+      <Filter>数据管理层</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DB.cpp">
-      <Filter>源文件</Filter>
+      <Filter>底层</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
+      <Filter>主入口</Filter>
     </ClCompile>
-    <ClCompile Include="CardSystem.cpp">
-      <Filter>源文件\业务层</Filter>
-    </ClCompile>
-    <ClCompile Include="LoginSystem.cpp">
-      <Filter>源文件\业务层</Filter>
-    </ClCompile>
-    <ClCompile Include="UserLevelSystem.cpp">
-      <Filter>源文件\业务层</Filter>
-    </ClCompile>
-    <ClCompile Include="Card.cpp">
-      <Filter>源文件\数据层</Filter>
-    </ClCompile>
-    <ClCompile Include="CardType.cpp">
-      <Filter>源文件\数据层</Filter>
-    </ClCompile>
-    <ClCompile Include="User.cpp">
-      <Filter>源文件\数据层</Filter>
-    </ClCompile>
-    <ClCompile Include="CardTypeMgr.cpp">
-      <Filter>源文件\数据管理层</Filter>
-    </ClCompile>
-    <ClCompile Include="CardMgr.cpp">
-      <Filter>源文件\数据管理层</Filter>
-    </ClCompile>
-    <ClCompile Include="UserMgr.cpp">
-      <Filter>源文件\数据管理层</Filter>
+    <ClCompile Include="CardRankType.cpp">
+      <Filter>数据层</Filter>
     </ClCompile>
     <ClCompile Include="CardLevAttrType.cpp">
-      <Filter>源文件\数据层</Filter>
-    </ClCompile>
-    <ClCompile Include="CardLevAttrTypeMgr.cpp">
-      <Filter>源文件\数据管理层</Filter>
+      <Filter>数据层</Filter>
     </ClCompile>
     <ClCompile Include="SkinType.cpp">
-      <Filter>源文件\数据层</Filter>
+      <Filter>数据层</Filter>
     </ClCompile>
-    <ClCompile Include="SkinTypeMgr.cpp">
-      <Filter>源文件\数据管理层</Filter>
+    <ClCompile Include="CardType.cpp">
+      <Filter>数据层</Filter>
     </ClCompile>
     <ClCompile Include="Skin.cpp">
-      <Filter>源文件\数据层</Filter>
+      <Filter>数据层</Filter>
+    </ClCompile>
+    <ClCompile Include="Card.cpp">
+      <Filter>数据层</Filter>
+    </ClCompile>
+    <ClCompile Include="User.cpp">
+      <Filter>数据层</Filter>
     </ClCompile>
     <ClCompile Include="SkinMgr.cpp">
-      <Filter>源文件\数据管理层</Filter>
+      <Filter>数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinTypeMgr.cpp">
+      <Filter>数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="CardTypeMgr.cpp">
+      <Filter>数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="CardMgr.cpp">
+      <Filter>数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="UserMgr.cpp">
+      <Filter>数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="CardLevAttrTypeMgr.cpp">
+      <Filter>数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginSystem.cpp">
+      <Filter>业务层</Filter>
+    </ClCompile>
+    <ClCompile Include="CardSystem.cpp">
+      <Filter>业务层</Filter>
+    </ClCompile>
+    <ClCompile Include="UserLevelSystem.cpp">
+      <Filter>业务层</Filter>
+    </ClCompile>
+    <ClCompile Include="CardRankTypeMgr.cpp">
+      <Filter>数据管理层</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

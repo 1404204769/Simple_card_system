@@ -147,6 +147,8 @@
   <ItemGroup>
     <ClInclude Include="Card.h" />
     <ClInclude Include="CardMgr.h" />
+    <ClInclude Include="CardRankType.h" />
+    <ClInclude Include="CardRankTypeMgr.h" />
     <ClInclude Include="CardSystem.h" />
     <ClInclude Include="CardType.h" />
     <ClInclude Include="CardTypeMgr.h" />
@@ -166,6 +168,8 @@
   <ItemGroup>
     <ClCompile Include="Card.cpp" />
     <ClCompile Include="CardMgr.cpp" />
+    <ClCompile Include="CardRankType.cpp" />
+    <ClCompile Include="CardRankTypeMgr.cpp" />
     <ClCompile Include="CardSystem.cpp" />
     <ClCompile Include="CardType.cpp" />
     <ClCompile Include="CardTypeMgr.cpp" />

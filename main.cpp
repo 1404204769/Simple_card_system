@@ -7,6 +7,7 @@
 #include "LoginSystem.h"
 #include "SkinTypeMgr.h"
 #include "UserLevelSystem.h"
+#include "CardRankTypeMgr.h"
 #include "CardLevAttrTypeMgr.h"
 using namespace std;
 CDB g_DB;
@@ -16,6 +17,7 @@ CLoginSystem g_LoginSystem;
 CCardTypeMgr g_CardTypeMgr;
 CSkinTypeMgr g_SkinTypeMgr;
 CUserLevelSystem g_UserLevelSystem;
+CCardRankTypeMgr g_CardRankTypeMgr;
 CCardLevAttrTypeMgr g_CardLevAttrTypeMgr;
 const string strDB("test");
 const string strServer("localhost");
@@ -27,7 +29,9 @@ void Init() {
 	g_CardTypeMgr.Init();
 	g_SkinTypeMgr.Init();
 	//g_SkinTypeMgr.PrintAll();
+	g_CardRankTypeMgr.Init();
 	g_CardLevAttrTypeMgr.Init();
+	//g_CardRankTypeMgr.Debug_PrintAll();
 }
 bool Subject(int nchoice) {
 	switch (nchoice)
