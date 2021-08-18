@@ -22,12 +22,14 @@ public:
 	bool Del(long long int i64CardId);/*根据玩家卡牌名称来删除数据*/
 	bool DelAll();/*删除所有的卡牌*/
 	void PrintAll();/*打印显示拥有的所有卡牌的数据*/
+	bool IsInit()const;/*检查是否初始化*/
 
 private:
 	
 	void Free();/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
 
 	CUser* m_pUser = nullptr;
+	bool m_bInit = false;
 
 	using CardMap = std::map<long long int, CCard*>;
 	using CardMapIter = CardMap::iterator;

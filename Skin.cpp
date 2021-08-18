@@ -98,7 +98,7 @@ long long int CSkin::GetUserId() const {
 	return m_i64UserId;
 }
 bool CSkin::IsWear()const {
-	if (m_i64CardId == 0)/*此时还没有卡牌穿戴这个皮肤*/
+	if (GetCardId() == 0)/*此时还没有卡牌穿戴这个皮肤*/
 		return false;
 	return true;
 }

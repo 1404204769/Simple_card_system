@@ -3,6 +3,7 @@
 using namespace std;
 CCardMgr::CCardMgr() {
 	/*构造函数*/
+	m_bInit = false;
 	Log("调用了CCardMgr构造函数\n");
 }
 CCardMgr::~CCardMgr() {
@@ -62,7 +63,6 @@ bool CCardMgr::Init(CUser* pUser) {
 			const long long int i64CardInt = pCard->GetCardId();
 			m_mapByCardId.insert({ i64CardInt,pCard.release() });
 		}
-
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		Log("CCardMgr::Init()  Query error: " +string( er.what())+ "\n");
@@ -80,7 +80,13 @@ bool CCardMgr::Init(CUser* pUser) {
 		Log("CCardMgr::Init()  Error: " +string( er.what())+ "\n");
 		return false;
 	}
-	return true;
+	m_bInit = true;
+	return m_bInit;
+}
+
+bool CCardMgr::IsInit()const {
+	/*检查是否初始化*/
+	return m_bInit;
 }
 CCard* CCardMgr::Get(const long long int _i64CardId) {
 	/*根据卡牌名称获取卡牌数据*/

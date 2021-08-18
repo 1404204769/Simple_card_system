@@ -26,6 +26,10 @@ bool CSkinMgr::Init(CUser* pUser) {
 
 		m_pUser = pUser;
 		CCardMgr& CardMgr = m_pUser->GetCardMgr();
+		if (!CardMgr.IsInit()) {
+			cout << "卡牌管理器还未初始化" << endl;
+			return false;
+		}
 		mysqlpp::UseQueryResult res;
 		mysqlpp::Query* pQuery = g_DB.GetQuery();
 
@@ -45,7 +49,6 @@ bool CSkinMgr::Init(CUser* pUser) {
 			return false;
 		}
 		Log("CSkinMgr::Init()  从数据库查询用户皮肤数据成功\n");
-
 		while (mysqlpp::Row row = res.fetch_row()) {
 			unique_ptr<CSkin> pSkin(new CSkin());
 			if (!pSkin) {
@@ -62,16 +65,8 @@ bool CSkinMgr::Init(CUser* pUser) {
 				Log("CSkinMgr::Init()  卡牌类型初始化失败\n");//打印在控制台
 				return false;
 			}
-
-			long long int i64CardId = 0;
-			if (pSkin->IsWear()&&CardMgr.Get(pSkin->GetCardId())) {
-				i64CardId = pSkin->GetCardId();
-			}
-
-			const long long int i64SkinId = pSkin->GetSkinId();
-			m_mapBySkinId.insert({ i64SkinId,pSkin.release() });
-			if (i64CardId != 0) {
-				m_mapByCardId.insert({ i64CardId ,m_mapBySkinId[i64SkinId] });
+			if (!Add(pSkin.release())) {
+				cout << "此皮肤（ID:"<<pSkin->GetSkinId()<<"）读入内存失败" << endl;
 			}
 		}
 
@@ -128,7 +123,11 @@ bool CSkinMgr::AddNew( const CSkinType* pSkinType) {
 		cout << "皮肤类型无效" << endl;
 		return false;
 	}
-
+	const unsigned int unSkinType = pSkinType->GetId();
+	if (m_setBySkinType.count(unSkinType)) {
+		cout << "此类皮肤已拥有，增加失败" << endl;
+		return false;
+	}
 	unique_ptr<CSkin> pSkin(new CSkin());
 	if (!pSkin) {
 		cout << "Skin实体化失败" << endl;
@@ -140,10 +139,46 @@ bool CSkinMgr::AddNew( const CSkinType* pSkinType) {
 		cout << "皮肤数据初始化失败，增加皮肤失败" << endl;
 		return false;
 	}
+	return Add(pSkin.release());
+}
 
+bool CSkinMgr::Add(CSkin* pSkin){
+	/*容器增加操作，choice=1：增加已有皮肤数据,choice=2:增加新皮肤*/
+	if (!m_pUser) {
+		cout << "此皮肤管理器与用户失联了" << endl;
+		return false;
+	}
+	if (!pSkin) {
+		cout << "传入的皮肤指针为空" << endl;
+		return false;
+	}
+	const unsigned int unSkinType = pSkin->GetSkinType();
+	if (m_setBySkinType.count(unSkinType)) {
+		cout << "此类皮肤已拥有，增加失败" << endl;
+		return false;
+	}
 	const long long int i64SkinId = pSkin->GetSkinId();
-	m_mapBySkinId.insert({ i64SkinId ,pSkin.release() });
+	const long long int i64UserId = pSkin->GetUserId();
+	const long long int i64CardId = pSkin->GetCardId();
+	if (m_mapBySkinId.count(i64SkinId)) {
+		cout << "此皮肤已存在，增加失败" << endl;
+		return false;
+	}
+	m_setBySkinType.insert(unSkinType);//记录类型数据
+	m_mapBySkinId.insert({ i64SkinId ,pSkin });//增加皮肤实体
+	if (!pSkin->IsWear() ) {//此皮肤没有被穿无需再进行操作
+		return true;
+	}
+	if (!m_pUser->GetCardMgr().Get(i64CardId)) {//此皮肤被未知的卡牌穿戴
+		return false;
+	}
+	if (m_mapByCardId.count(i64CardId)) {
+		cout << "穿戴该皮肤的卡牌已经穿上别的皮肤了" << endl;
+		return false;
+	}
+	m_mapByCardId.insert({ i64CardId ,m_mapBySkinId[i64SkinId] });
 	return true;
+	
 }
 bool CSkinMgr::Del(long long int i64SkinId) {
 	/*根据皮肤Id删除皮肤*/
@@ -163,7 +198,8 @@ bool CSkinMgr::Del(long long int i64SkinId) {
 	if (i64CardId != 0) {
 		m_mapByCardId.erase(i64CardId);
 	}
-
+	const unsigned int unSkinType = pSkin->GetSkinType();
+	m_setBySkinType.erase(unSkinType);
 	m_mapBySkinId.erase(i64SkinId);
 	if (!pSkin->Delete())
 	{
@@ -187,6 +223,7 @@ void CSkinMgr::DeBug_DelAll() {
 	}
 	m_mapByCardId.clear();
 	m_mapBySkinId.clear();
+	m_setBySkinType.clear();
 	return ;
 }
 void CSkinMgr::PrintAll() {
@@ -213,14 +250,16 @@ bool CSkinMgr::Wear(const long long int i64CardId, const long long int i64SkinId
 		cout << "用户与皮肤管理器失联了" << endl;
 		return false;
 	}
-
 	CCardMgr& CardMgr = m_pUser->GetCardMgr();
 	CCard* pCard = CardMgr.Get(i64CardId);
 	if (!pCard) {
 		cout << "没有找到要穿上皮肤的卡牌" << endl;
 		return false;
 	}
-
+	if (m_mapByCardId.count(i64CardId)) {
+		cout << "该卡牌已经穿上了别的皮肤了" << endl;
+		return false;
+	}
 	CSkin* pSkin = Get(i64SkinId);
 	if (!pSkin) {
 		cout << "没有找到要穿戴的皮肤" << endl;
@@ -244,6 +283,10 @@ bool CSkinMgr::Drop(const long long int i64CardId, const long long int i64SkinId
 		cout << "没有找到要脱下皮肤的卡牌" << endl;
 		return false;
 	}
+	if (!m_mapByCardId.count(i64CardId)) {
+		cout << "该卡牌本就没穿皮肤" << endl;
+		return false;
+	}
 	CSkin* pSkin = Get(i64SkinId);
 	if (!pSkin) {
 		cout << "没有找到要脱下的皮肤" << endl;
@@ -262,4 +305,5 @@ void CSkinMgr::Free() {
 	}
 	m_mapBySkinId.clear();
 	m_mapByCardId.clear();
+	m_setBySkinType.clear();
 }
