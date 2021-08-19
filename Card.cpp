@@ -174,7 +174,7 @@ bool CCard::SetLevel(unsigned int unLev) {
 }
 bool CCard::SetRank(unsigned int unRank) {
 	/*设置Rank等级*/
-	if (unRank <= 0)
+	if (unRank < 0)
 		return false;
 
 	const CCardRankType* pCardRankType = g_CardRankTypeMgr.Get(unRank);
@@ -203,7 +203,7 @@ bool CCard::Insert(long long int& i64CardId_Out) {
 			return false;
 		}
 
-		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev，%5q:rank_lev)";
+		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev,%5q:rank_lev)";
 		pQuery->parse();
 		pQuery->template_defaults["user_id"] = m_i64UserId;
 		pQuery->template_defaults["card_type"] = m_unCardType;
@@ -219,22 +219,7 @@ bool CCard::Insert(long long int& i64CardId_Out) {
 			return false;
 		}
 		Log("CCard::Insert()  往数据库插入用户新卡牌数据成功\n");
-
-		pQuery->reset();
-		*pQuery << "select @@IDENTITY as ID";
-		pQuery->parse();
-
-		mysqlpp::UseQueryResult res;
-		if (!g_DB.Search(res, *pQuery)) {
-			Log("CCard::Insert()  获取系统分配的CardId失败\n");
-			return false;
-		}
-		mysqlpp::Row row = res.fetch_row();
-		if (!row) {
-			Log("CCard::Insert()  没有获取到系统分配的CardId\n");
-			return false;
-		}
-		i64CardId_Out = row["ID"];
+		i64CardId_Out = pQuery->insert_id();
 
 	}
 	catch (const mysqlpp::BadQuery& er) {
@@ -306,12 +291,13 @@ bool CCard::Update() {
 			return false;
 		}
 
-		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev where id = %4q:CardId;";
+		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev,rank_lev=%4q:rank_lev where id = %5q:CardId;";
 		pQuery->parse();
 		pQuery->template_defaults["UserId"] = m_i64UserId;
 		pQuery->template_defaults["Name"] = m_strName.c_str();
 		pQuery->template_defaults["Exp"] = m_i64Exp;
 		pQuery->template_defaults["Lev"] = m_unLev;
+		pQuery->template_defaults["rank_lev"] = m_unRankLev;
 		pQuery->template_defaults["CardId"] = m_i64CardId;
 
 		Log("Query:" + pQuery->str() + "\n");

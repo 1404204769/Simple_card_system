@@ -79,17 +79,22 @@ bool CCardSystem::CardLevUp(const std::string& strUserAccount, const long long i
 	}
 	return true;
 }
-bool CCardSystem::CardRankLevUp(const long long int i64UserId, const long long int i64CardId) {
+bool CCardSystem::CardRankLevUp(const long long int i64UserId, const long long int i64CardId, vector<long long int>&vecConsume) {
 	/*为指定玩家的指定卡牌提升阶级*/
+	set<long long int>setConsume(vecConsume.begin(),vecConsume.end());
+	if (setConsume.size() != vecConsume.size()) {
+		cout << "要消耗的卡牌中出现了重复的" << endl;
+		return false;
+	}
 
-	CUser* pUser = g_UserMgr.Get(i64UserId);
+	CUser* const pUser = g_UserMgr.Get(i64UserId);
 	if (!pUser) {
 		cout << "指定用户未登入，请登入后操作" << endl;
 		return false;
 	}
 
-	CCardMgr& CardMgr = pUser->GetCardMgr();
-	CCard* pCard = CardMgr.Get(i64CardId);
+	CCardMgr& rCardMgr = pUser->GetCardMgr();
+	CCard* const pCard = rCardMgr.Get(i64CardId);
 	if (!pCard) {
 		cout << "要升阶的主体卡牌不存在" << endl;
 		return false;
@@ -97,58 +102,47 @@ bool CCardSystem::CardRankLevUp(const long long int i64UserId, const long long i
 
 	const unsigned int unRankLev = pCard->GetCardRankLev();
 
-	const CCardRankType* CardRandType = g_CardRankTypeMgr.Get(unRankLev+1);
-	if (!CardRandType) {
+	const CCardRankType* pCardRandType = g_CardRankTypeMgr.Get(unRankLev+1);
+	if (!pCardRandType) {
 		cout << "此卡牌已经无法升阶" << endl;
 		return false;
 	}
-	const unsigned int unCostNum = CardRandType->GetCostCardNum();
+	const unsigned int unCostNum = pCardRandType->GetCostCardNum();
 	const unsigned int unCardType = pCard->GetCardType();
-	vector<long long int>vecConsume;
 
 	cout << "此次升阶需要消耗" << unCostNum << "张同类型同阶级卡牌" << endl;
-	cout << "请逐个输入要消耗的卡牌ID（若要取消升阶请输入0）" << endl;
-	for (unsigned int i = 0; i < unCostNum; i++) {
-		cout << "请输入第"<<i+1<<"个消耗品的ID: " << endl;
-		long long int i64ConCardId;
-		cin >> i64ConCardId;
-		if (i64ConCardId == 0) {
-			cout << "检测到取消升阶的操作，正在取消升阶" << endl;
-			vecConsume.clear();
-			return false;
-		}
-		CCard* pCard = CardMgr.Get(i64ConCardId);
-		if (!pCard) {
-			cout << "输入的卡牌ID是无效ID，请重新输入" << endl;
-			i--;
-			continue;
-		}
-		if (pCard->GetCardType() != unCardType) {
-			cout << "输入的卡牌ID所对应的卡牌的类型与升阶主体卡牌不同，请重新输入" << endl;
-			i--;
-			continue;
-		}
-		if (pCard->GetCardRankLev() != unRankLev) {
-			cout << "输入的卡牌ID所对应的卡牌的阶级与升阶主体卡牌不同，请重新输入" << endl;
-			i--;
-			continue;
-		}
-		vecConsume.push_back(i64ConCardId);
-	}
-	cout << "消耗品输入完毕，现在开始准备升阶" << endl;
+
 	if (vecConsume.size() != unCostNum) {
 		cout << "发生错误，消耗品数量不满足升阶条件" << endl;
-		vecConsume.clear();
 		return false;
 	}
-	for (auto iter : vecConsume) {
-		if (!CardMgr.Del(iter)) {
-			cout << "消耗品ID:"<<iter<<"消耗失败，升阶失败，已消耗的卡牌已报废" << endl;
+	cout << "正在逐个检查要消耗的卡牌ID的合法性" << endl;
+	for (const auto i64ConCardId : vecConsume) {
+		CCard* const pCard = rCardMgr.Get(i64ConCardId);
+		if (!pCard) {
+			cout << "卡牌ID:"<< i64ConCardId <<" 是无效ID" << endl;
+			return false;
+		}
+		if (!IsLowValue(pCard)) {
+			cout << "要消耗的卡牌是高价值的，请慎重考虑" << endl;
+			return false;
+		}
+		if (pCard->GetCardType() != unCardType) {
+			cout << "卡牌ID:" << i64ConCardId << " 所对应的卡牌的类型与升阶主体卡牌不同" << endl;
+			return false;
+		}
+		if (pCard->GetCardRankLev() != unRankLev) {
+			cout << "卡牌ID:" << i64ConCardId << " 所对应的卡牌的阶级与升阶主体卡牌不同" << endl;
 			return false;
 		}
 	}
-	pCard->RankUp();
-	return true;
+	for (const auto i64ConCardId : vecConsume) {
+		if (!rCardMgr.Del(i64ConCardId)) {
+			cout << "消耗品ID:"<< i64ConCardId <<"消耗失败，升阶失败，已消耗的卡牌已报废" << endl;
+			return false;
+		}
+	}
+	return pCard->RankUp();
 }
 bool CCardSystem::ShowCard(const std::string& strUserAccount) {
 	/*打印显示指定用户的所有卡牌*/
@@ -192,7 +186,8 @@ bool CCardSystem::ShowCardAtk(const std::string& strUserAccount,const long long 
 	long long int Atk = 0;
 	const CCardType &CardType = pCard->GetCardTypeData();
 	const CCardLevAttrType& CardLevAttrType = pCard->GetCardLevAttrTypeData();
-	Atk += CardType.GetAtk() + CardLevAttrType.GetAtk();
+	const CCardRankType& CardRankType = pCard->GetCardRankTypeData();
+	Atk += CardType.GetAtk() + CardLevAttrType.GetAtk()+ CardRankType.GetAtk();
 	if (pSkin) {
 		unsigned int SkinType = pSkin->GetSkinType();
 		const CSkinType* pSkinType = g_SkinTypeMgr.Get(SkinType);
@@ -255,5 +250,15 @@ bool CCardSystem::ShowSkin(const long long int i64UserId) {
 
 	CSkinMgr& SkinMgr = pUser->GetSkinMgr();
 	SkinMgr.PrintAll();
+	return true;
+}
+
+bool CCardSystem::IsLowValue(CCard* const pCard) const {
+	/*判断卡牌是否是低价值的*/
+	if (!pCard) {
+		return false;
+	}
+	if (pCard->GetLev() > 1)
+		return false;
 	return true;
 }

@@ -115,6 +115,7 @@ void CCardMgr::PrintAll() {
 		CSkin* pSkin = SkinMgr.GetWearing(i64CardId);
 		const CCardType& CardType = pCard->GetCardTypeData();
 		const CCardLevAttrType& CardLevAttrType = pCard->GetCardLevAttrTypeData();
+		const CCardRankType& CardRankType = pCard->GetCardRankTypeData();
 
 		long long int i64Hp = 0, i64Mp = 0, i64Atk = 0;
 		string strSkinName = "нч\t";
@@ -131,11 +132,12 @@ void CCardMgr::PrintAll() {
 			i64Atk += pSkinType->GetAtk();
 			strSkinName = pSkinType->GetName();
 		}
-		i64Hp += CardType.GetHp() + CardLevAttrType.GetHp();
-		i64Mp += CardType.GetMp() + CardLevAttrType.GetMp();
-		i64Atk += CardType.GetAtk() + CardLevAttrType.GetAtk();
-		cout << "CardID:" << i64CardId << "\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName() <<"\tSkin:"<<strSkinName
-			<< "\tLev:" << pCard->GetLev() << "\tExp:" << pCard->GetExp() << "\tHp:" << i64Hp << "\tMp:" << i64Mp << "\tAtk:" << i64Atk << endl;
+		i64Hp += CardType.GetHp() + CardLevAttrType.GetHp()+ CardRankType.GetHp();
+		i64Mp += CardType.GetMp() + CardLevAttrType.GetMp()+ CardRankType.GetMp();
+		i64Atk += CardType.GetAtk() + CardLevAttrType.GetAtk()+CardRankType.GetAtk();
+		cout << "CardID:" << i64CardId << "\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName() 
+			<<"\tSkin:"<<strSkinName << "\tLev:" << pCard->GetLev() << "\tRank_Lev:" << pCard->GetCardRankLev() << "\tExp:" << pCard->GetExp()
+			<< "\tHp:" << i64Hp << "\tMp:" << i64Mp << "\tAtk:" << i64Atk << endl;
 	}
 }
 bool CCardMgr::Add(const CCardType* pCardType) {

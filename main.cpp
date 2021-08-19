@@ -33,14 +33,32 @@ void Init() {
 	g_CardLevAttrTypeMgr.Init();
 	//g_CardRankTypeMgr.Debug_PrintAll();
 }
+void CardRankLevUp();/*卡牌升级*/
+bool Subject(int nchoice);
+int main() {
+	Init();
+	bool bContinue = true;
+	while (bContinue) {
+		system("cls");
+		cout << "请选择功能:\n1.登入\n2.注销\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级\n9.给玩家卡牌穿上皮肤\n10.从玩家卡牌脱下皮肤\n11.给玩家增加皮肤\n12.显示玩家拥有的所有皮肤\n13.指定玩家指定卡牌升阶" << endl;
+		int nchoice = 1;
+		cin >> nchoice;
+		getchar();
+		bContinue = Subject(nchoice);
+		system("pause");
+	}
+
+	return 0;
+}
 bool Subject(int nchoice) {
 	switch (nchoice)
 	{
+	case 0:return false; break;
 	case 1: {
 		string strAccount = "";
 		cout << "请输入要登入的账号:";
 		getline(cin, strAccount);
-		if (!g_LoginSystem.Login(strAccount)) 
+		if (!g_LoginSystem.Login(strAccount))
 			cout << "登入失败，请重试" << endl;
 		else
 			cout << "登入成功，请继续" << endl;
@@ -113,7 +131,7 @@ bool Subject(int nchoice) {
 		cout << "请输入要提升的等级" << endl;
 		unsigned int unLev;
 		cin >> unLev;
-		if (!g_CardSystem.CardLevUp(strUserAccount, i64CardId,unLev))
+		if (!g_CardSystem.CardLevUp(strUserAccount, i64CardId, unLev))
 			cout << "卡牌升级失败" << endl;
 		else
 			cout << "卡牌升级成功" << endl;
@@ -165,23 +183,30 @@ bool Subject(int nchoice) {
 		else
 			cout << "皮肤展示成功" << endl;
 	}break;
-	default:return false;
-		break;
+	case 13: {
+		CardRankLevUp();
+	}break;
+	default:break;
 	}
 	return true;
 }
-int main() {
-	Init();
-	bool bContinue = true;
-	while (bContinue) {
-		system("cls");
-		cout << "请选择功能:\n1.登入\n2.注销\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级\n9.给玩家卡牌穿上皮肤\n10.从玩家卡牌脱下皮肤\n11.给玩家增加皮肤\n12.显示玩家拥有的所有皮肤" << endl;
-		int nchoice = 1;
-		cin >> nchoice;
-		getchar();
-		bContinue = Subject(nchoice);
-		system("pause");
+void CardRankLevUp() {
+	long long int i64UserId, i64CardId,i64CardConId;
+	int nNum;
+	cout << "请输入指定玩家的Id" << endl;
+	cin >> i64UserId;
+	cout << "请输入要升阶的卡牌Id" << endl;
+	cin >> i64CardId;
+	cout << "请输入要消耗的卡牌的数量" << endl;
+	cin >> nNum;
+	vector<long long int>vecConmuse;
+	for (int i = 0; i < nNum; i++) {
+		cout << "请输入第" << i + 1 << "个消耗品的ID: " << endl;
+		cin >> i64CardConId;
+		vecConmuse.push_back(i64CardConId);
 	}
-
-	return 0;
+	if (!g_CardSystem.CardRankLevUp(i64UserId, i64CardId,vecConmuse))
+		cout << "卡牌升阶失败" << endl;
+	else
+		cout << "卡牌升阶成功" << endl;
 }

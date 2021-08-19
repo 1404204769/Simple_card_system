@@ -24,7 +24,8 @@ public:
 	bool AddSkin(const long long int i64UserId,const unsigned int unSkinType);/*指定用户获得指定类型指定皮肤*/
 	bool ShowSkin(const long long int i64UserId);/*展示用户拥有的所有皮肤*/
 
-	bool CardRankLevUp(const long long int i64UserId, const long long int i64CardId);/*为指定玩家的指定卡牌提升阶级*/
+	bool CardRankLevUp(const long long int i64UserId, const long long int i64CardId, std::vector<long long int>&vecConsume);/*为指定玩家的指定卡牌提升阶级*/
+	bool IsLowValue(CCard* const pCard) const;/*判断卡牌是否是低价值的*/
 };
 
 
