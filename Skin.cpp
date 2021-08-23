@@ -7,7 +7,7 @@ CSkin::CSkin() {
 }
 CSkin::~CSkin() {
 	/*析构函数*/
-	Log("调用了CCard析构函数\n");
+	Log("调用了CSkin析构函数\n");
 	Update();
 }
 
@@ -28,7 +28,7 @@ bool CSkin::CreateNewSkin(const long long int i64UserId, const CSkinType* pSkinT
 	m_unSkinType = pSkinType->GetId();
 	m_i64CardId = 0;
 
-	if (!Insert(m_i64SkinId)) {
+	if (!Insert()) {
 		cout << "新皮肤插入数据库失败" << endl;
 		return false;
 	}
@@ -175,7 +175,7 @@ bool CSkin::Delete() {
 	}
 	return true;
 }
-bool CSkin::Insert(long long int& i64SkinId_Out) {
+bool CSkin::Insert() {
 	/*将Skin数据插入数据库*/
 	try
 	{
@@ -199,7 +199,7 @@ bool CSkin::Insert(long long int& i64SkinId_Out) {
 		}
 		Log("CSkin::Insert()  往数据库插入用户新皮肤数据成功\n");
 
-		i64SkinId_Out = pQuery->insert_id();
+		m_i64SkinId = pQuery->insert_id();
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		Log("CSkin::Insert()  Query error: " + string(er.what()) + "\n");

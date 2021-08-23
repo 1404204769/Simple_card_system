@@ -39,10 +39,9 @@ bool CCard::CreateNewCard(const long long int i64UserId, const CCardType* pCardT
 	m_i64UserId = i64UserId;
 	m_unCardType = pCardType->GetCardType();
 	m_strName = pCardType->GetName();
-	m_i64Exp = 0;
 	m_pCardType = pCardType;
 
-	if (!Insert(m_i64CardId)) {
+	if (!Insert()) {
 		cout << "新卡牌插入数据库失败" << endl;
 		return false;
 	}
@@ -133,6 +132,19 @@ long long int CCard::GetExp() const{
 	/*获取m_i64Exp*/
 	return m_i64Exp;
 }
+
+long long int CCard::GetPosHat()const {
+	/*获取m_i64EquipPosHat*/
+	return m_i64EquipPosHat;
+}
+long long int CCard::GetPosArmour()const {
+	/*获取m_i64PosArmour*/
+	return m_i64EquipPosArmour;
+}
+long long int CCard::GetPosShoes()const {
+	/*获取m_i64PosShoes*/
+	return m_i64EquipPosShoes;
+}
 const CCardType& CCard::GetCardTypeData() const{
 	/*获取对应的卡牌类型详细数据*/
 	assert(m_pCardType);
@@ -188,12 +200,31 @@ bool CCard::SetRank(unsigned int unRank) {
 	return true;
 }
 
+bool CCard::SetPosHat(long long int i64EquipId) {
+	/*设置头部装备对应装备ID*/
+	////!!!!!!需要先加载装备管理器，查询此装备是否存在
+	m_i64EquipPosHat = i64EquipId;
+	return true;
+
+}
+bool CCard::SetPosArmour(long long int i64EquipId) {
+	/*设置衣甲装备对应装备ID*/
+	////!!!!!!需要先加载装备管理器，查询此装备是否存在
+	m_i64EquipPosArmour = i64EquipId;
+	return true;
+}
+bool CCard::SetPosShoes(long long int i64EquipId) {
+	/*设置鞋子装备对应装备ID*/
+	////!!!!!!需要先加载装备管理器，查询此装备是否存在
+	m_i64EquipPosShoes = i64EquipId;
+	return true;
+}
 /*
 * 以下是数据库层相关接口
 */
 
 
-bool CCard::Insert(long long int& i64CardId_Out) {
+bool CCard::Insert() {
 	/*将Card数据插入数据库*/
 	try
 	{
@@ -203,14 +234,11 @@ bool CCard::Insert(long long int& i64CardId_Out) {
 			return false;
 		}
 
-		*pQuery << "insert into d_card values(0,%0q:user_id, %1q:card_type,%2q:name,%3q:exp,%4q:lev,%5q:rank_lev)";
+		*pQuery << "insert into d_card(user_id,card_type,name) values(%0q:user_id, %1q:card_type,%2q:name)";
 		pQuery->parse();
 		pQuery->template_defaults["user_id"] = m_i64UserId;
 		pQuery->template_defaults["card_type"] = m_unCardType;
 		pQuery->template_defaults["name"] = m_strName.c_str();
-		pQuery->template_defaults["exp"] = m_i64Exp;
-		pQuery->template_defaults["lev"] = m_unLev;
-		pQuery->template_defaults["rank_lev"] = m_unRankLev;
 
 		Log("Query:" + pQuery->str() + "\n");
 
@@ -219,7 +247,7 @@ bool CCard::Insert(long long int& i64CardId_Out) {
 			return false;
 		}
 		Log("CCard::Insert()  往数据库插入用户新卡牌数据成功\n");
-		i64CardId_Out = pQuery->insert_id();
+		m_i64CardId = pQuery->insert_id();
 
 	}
 	catch (const mysqlpp::BadQuery& er) {
@@ -291,13 +319,16 @@ bool CCard::Update() {
 			return false;
 		}
 
-		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev,rank_lev=%4q:rank_lev where id = %5q:CardId;";
+		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev,rank_lev=%4q:rank_lev,equip_pos_hat=%5q:pos_hat,equip_pos_armour=%6q:pos_armour,equip_pos_shoes=%7q:pos_shoes where id = %8q:CardId;";
 		pQuery->parse();
 		pQuery->template_defaults["UserId"] = m_i64UserId;
 		pQuery->template_defaults["Name"] = m_strName.c_str();
 		pQuery->template_defaults["Exp"] = m_i64Exp;
 		pQuery->template_defaults["Lev"] = m_unLev;
 		pQuery->template_defaults["rank_lev"] = m_unRankLev;
+		pQuery->template_defaults["pos_hat"] = m_i64EquipPosHat;
+		pQuery->template_defaults["pos_armour"] = m_i64EquipPosArmour;
+		pQuery->template_defaults["pos_shoes"] = m_i64EquipPosShoes;
 		pQuery->template_defaults["CardId"] = m_i64CardId;
 
 		Log("Query:" + pQuery->str() + "\n");

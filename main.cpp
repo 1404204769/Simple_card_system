@@ -6,6 +6,7 @@
 #include "CardTypeMgr.h"
 #include "LoginSystem.h"
 #include "SkinTypeMgr.h"
+#include "EquipTypeMgr.h"
 #include "UserLevelSystem.h"
 #include "CardRankTypeMgr.h"
 #include "CardLevAttrTypeMgr.h"
@@ -16,6 +17,7 @@ CCardSystem g_CardSystem;
 CLoginSystem g_LoginSystem;
 CCardTypeMgr g_CardTypeMgr;
 CSkinTypeMgr g_SkinTypeMgr;
+CEquipTypeMgr g_EquipTypeMgr;
 CUserLevelSystem g_UserLevelSystem;
 CCardRankTypeMgr g_CardRankTypeMgr;
 CCardLevAttrTypeMgr g_CardLevAttrTypeMgr;
@@ -28,10 +30,14 @@ void Init() {
 	g_DB.InitConnect(strDB, strServer, strUser, strPassword, nPort);
 	g_CardTypeMgr.Init();
 	g_SkinTypeMgr.Init();
-	//g_SkinTypeMgr.PrintAll();
+	g_SkinTypeMgr.PrintAll();
+	g_EquipTypeMgr.Init();
+	g_EquipTypeMgr.PrintAll();
 	g_CardRankTypeMgr.Init();
+	g_CardRankTypeMgr.Debug_PrintAll();
 	g_CardLevAttrTypeMgr.Init();
-	//g_CardRankTypeMgr.Debug_PrintAll();
+	g_CardLevAttrTypeMgr.Debug_PrintAll();
+	system("pause");
 }
 void CardRankLevUp();/*卡牌升级*/
 bool Subject(int nchoice);
@@ -40,7 +46,7 @@ int main() {
 	bool bContinue = true;
 	while (bContinue) {
 		system("cls");
-		cout << "请选择功能:\n1.登入\n2.注销\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级\n9.给玩家卡牌穿上皮肤\n10.从玩家卡牌脱下皮肤\n11.给玩家增加皮肤\n12.显示玩家拥有的所有皮肤\n13.指定玩家指定卡牌升阶" << endl;
+		cout << "请选择功能:\n1.登入\n2.注销\n\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级\n\n9.给玩家卡牌穿上皮肤\n10.从玩家卡牌脱下皮肤\n11.给玩家增加皮肤\n12.显示玩家拥有的所有皮肤\n\n13.指定玩家指定卡牌升阶" << endl;
 		int nchoice = 1;
 		cin >> nchoice;
 		getchar();

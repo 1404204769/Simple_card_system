@@ -21,6 +21,17 @@ const CCardLevAttrType* CCardLevAttrTypeMgr::Get(unsigned int unLev) {
 
 	return iterByLev->second;
 }
+bool CCardLevAttrTypeMgr::Debug_PrintAll() {
+	/*打印显示静态配置*/
+	for (auto& iter : m_mapByLev) {
+		const CCardLevAttrType* pCardLevAttrType = iter.second;
+		if (!pCardLevAttrType)
+			continue;
+		cout << "Id:" << iter.first << "\tLev:" << pCardLevAttrType->GetCardLev() << "\tHp:" << pCardLevAttrType->GetHp() 
+			<< "\tMp:"<< pCardLevAttrType->GetMp() << "\tAtk:" << pCardLevAttrType->GetAtk() << endl;
+	}
+	return true;
+}
 bool CCardLevAttrTypeMgr::Init() {
 	/*调用CDB函数查找指定对象,返回查询结果，如果引用的CCardType对象的ID为0则说明数据库中无此数据*/
 	try

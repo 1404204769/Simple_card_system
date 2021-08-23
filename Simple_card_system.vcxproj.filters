@@ -79,6 +79,15 @@
     <ClInclude Include="CardRankTypeMgr.h">
       <Filter>数据管理层</Filter>
     </ClInclude>
+    <ClInclude Include="EquipType.h">
+      <Filter>数据层</Filter>
+    </ClInclude>
+    <ClInclude Include="EquipTypeMgr.h">
+      <Filter>数据管理层</Filter>
+    </ClInclude>
+    <ClInclude Include="Equip.h">
+      <Filter>数据层</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DB.cpp">
@@ -137,6 +146,15 @@
     </ClCompile>
     <ClCompile Include="CardRankTypeMgr.cpp">
       <Filter>数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="EquipType.cpp">
+      <Filter>数据层</Filter>
+    </ClCompile>
+    <ClCompile Include="EquipTypeMgr.cpp">
+      <Filter>数据管理层</Filter>
+    </ClCompile>
+    <ClCompile Include="Equip.cpp">
+      <Filter>数据层</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
