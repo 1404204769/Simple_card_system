@@ -3,6 +3,7 @@
 #define _CARDSYSTEM_H_
 #include <string>
 #include "CardMgr.h"
+#include "EquipMgr.h"
 #include "UserMgr.h"
 #include "DebugPrint.h"
 #include "CardTypeMgr.h"
@@ -19,13 +20,19 @@ public:
 	bool ShowCard(const std::string& strUserAccount);/*打印显示指定用户的所有卡牌*/
 	bool ShowCardAtk(const std::string& strUserAccount,const long long int i64CardId);/*打印显示指定用户的指定卡牌的攻击力*/
 
-	bool Wear(const long long int i64UserId, const long long int i64CardId, const long long int  i64SkinId);/*指定用户指定卡牌穿指定皮肤*/
-	bool Drop(const long long int i64UserId, const long long int i64CardId, const long long int  i64SkinId);/*指定用户指定卡牌脱指定皮肤*/
-	bool AddSkin(const long long int i64UserId,const unsigned int unSkinType);/*指定用户获得指定类型指定皮肤*/
-	bool ShowSkin(const long long int i64UserId);/*展示用户拥有的所有皮肤*/
+	bool SkinWear(const long long int i64UserId, const long long int i64CardId, const long long int  i64SkinId);/*指定用户指定卡牌穿指定皮肤*/
+	bool SkinDrop(const long long int i64UserId, const long long int i64CardId, const long long int  i64SkinId);/*指定用户指定卡牌脱指定皮肤*/
+	bool SkinAdd(const long long int i64UserId,const unsigned int unSkinType);/*指定用户获得指定类型指定皮肤*/
+	bool SkinShow(const long long int i64UserId);/*展示用户拥有的所有皮肤*/
 
 	bool CardRankLevUp(const long long int i64UserId, const long long int i64CardId, std::vector<long long int>&vecConsume);/*为指定玩家的指定卡牌提升阶级*/
 	bool IsLowValue(CCard* const pCard) const;/*判断卡牌是否是低价值的*/
+
+	bool EquipWear(const long long int i64UserId, const long long int i64CardId, const long long int  i64EquipId);/*指定用户指定卡牌穿指定装备*/
+	bool EquipDrop(const long long int i64UserId, const long long int  i64EquipId);/*指定用户脱指定装备*/
+	bool EquipAdd(const long long int i64UserId, const unsigned int unEquipType);/*指定用户获得指定类型装备*/
+	bool EquipShow(const long long int i64UserId);/*展示用户拥有的所有装备*/
+
 };
 
 

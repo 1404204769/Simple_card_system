@@ -7,7 +7,7 @@ CEquip::CEquip() {
 CEquip::~CEquip() {
 	/*析构函数*/
 	Log("调用了CEquip析构函数\n");
-	Update();
+//	Update();
 }
 
 bool CEquip::CreateNewEquip(const long long int i64UserId, const CEquipType* pEquipType) {
@@ -51,7 +51,7 @@ bool CEquip::CreateFromDB(const mysqlpp::Row& row, const CEquipType* pEquipType)
 		m_unEquipType = row["equip_type"];
 		if (m_unEquipType != pEquipType->GetId())
 		{
-			cout << "卡牌类型不匹配，新建卡牌失败" << endl;
+			cout << "装备类型不匹配，新建装备失败" << endl;
 			return false;
 		}
 		m_i64UserId = row["user_id"];
@@ -98,7 +98,7 @@ bool CEquip::Insert() {
 			return false;
 		}
 
-		*pQuery << "insert into d_skin values(0,%0q:user_id,%1q:equip_type)";
+		*pQuery << "insert into d_equip values(0,%0q:user_id,%1q:equip_type)";
 		pQuery->parse();
 		pQuery->template_defaults["user_id"] = m_i64UserId;
 		pQuery->template_defaults["equip_type"] = m_unEquipType;

@@ -157,6 +157,7 @@
     <ClInclude Include="DB.h" />
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="Equip.h" />
+    <ClInclude Include="EquipMgr.h" />
     <ClInclude Include="EquipTypeMgr.h" />
     <ClInclude Include="EquipType.h" />
     <ClInclude Include="LoginSystem.h" />
@@ -180,6 +181,7 @@
     <ClCompile Include="CardLevAttrTypeMgr.cpp" />
     <ClCompile Include="DB.cpp" />
     <ClCompile Include="Equip.cpp" />
+    <ClCompile Include="EquipMgr.cpp" />
     <ClCompile Include="EquipTypeMgr.cpp" />
     <ClCompile Include="EquipType.cpp" />
     <ClCompile Include="LoginSystem.cpp" />

@@ -4,6 +4,7 @@
 #include "DB.h"
 #include <string>
 #include <mysql++.h>
+
 class CEquipType
 {
 public:
@@ -21,7 +22,7 @@ public:
 
 private:
 	unsigned int m_unId = 0;
-	enum Pos { Prohibit=0,Hat,Armour,Shoes} m_unPos = Prohibit;
+	unsigned int m_unPos = 0;
 	long long int m_i64Hp = 0, m_i64Mp = 0, m_i64Atk = 0;
 	std::string m_strName;
 };

@@ -88,6 +88,9 @@
     <ClInclude Include="Equip.h">
       <Filter>数据层</Filter>
     </ClInclude>
+    <ClInclude Include="EquipMgr.h">
+      <Filter>数据管理层</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DB.cpp">
@@ -155,6 +158,9 @@
     </ClCompile>
     <ClCompile Include="Equip.cpp">
       <Filter>数据层</Filter>
+    </ClCompile>
+    <ClCompile Include="EquipMgr.cpp">
+      <Filter>数据管理层</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

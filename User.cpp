@@ -1,6 +1,7 @@
 #include "User.h"
 #include "CardMgr.h"
 #include "SkinMgr.h"
+#include "EquipMgr.h"
 using namespace std;
 CUser::CUser(const std::string& _strAccount) {
 	m_strAccount = _strAccount;
@@ -17,6 +18,7 @@ CUser::~CUser()
 
 	delete m_pCardMgr;
 	delete m_pSkinMgr;
+	delete m_pEquipMgr;
 }
 
 
@@ -48,6 +50,12 @@ CSkinMgr& CUser::GetSkinMgr() const {
 	assert(m_pSkinMgr);
 
 	return *m_pSkinMgr;
+}
+
+CEquipMgr& CUser::GetEquipMgr() const {
+	assert(m_pEquipMgr);
+
+	return *m_pEquipMgr;
 }
 void CUser::SetLev(const unsigned int _unLev) {
 	m_unLev = _unLev;
@@ -211,6 +219,13 @@ bool CUser::Init(const mysqlpp::Row& row) {
 		m_unLev = row["lev"];
 		m_i64Id = row["id"];
 
+		m_pEquipMgr = new CEquipMgr();
+		if (!m_pEquipMgr->Init(this)) {
+			cout << "用户拥有的装备加载失败" << endl;
+			delete m_pCardMgr;
+			m_pCardMgr = nullptr;
+			return false;
+		}
 		m_pCardMgr = new CCardMgr();
 		if (!m_pCardMgr->Init(this)) {
 			cout << "用户拥有的卡牌加载失败" << endl;

@@ -20,25 +20,7 @@ bool CEquipType::Init(const mysqlpp::Row& row) {
 		}/*否则说明找打对应数据，将其映射到CUser对象上*/
 
 		m_unId = row["id"];
-		unsigned int unPos = row["pos"];
-		switch (unPos)
-		{
-			case 0: {
-				m_unPos = Prohibit;
-			}break;
-			case 1: {
-				m_unPos = Hat;
-			}break;
-			case 2: {
-				m_unPos = Armour;
-			}break;
-			case 3: {
-				m_unPos = Shoes;
-			}break;
-			default:
-				cout << "数据库读取的装备的类型发现错误" << endl;
-			break;
-		}
+		m_unPos = row["pos"];
 		m_strName = row["name"];
 		m_i64Hp = row["hp"];
 		m_i64Mp = row["mp"];
@@ -73,21 +55,6 @@ unsigned int CEquipType::GetId() const {
 }
 unsigned int CEquipType::GetPos() const {
 	/*获取m_unPos  0表示不可穿戴，1表示穿戴在头部，2表示穿戴在胸口，3表示穿戴在脚上*/
-	switch (m_unPos)
-	{
-	case CEquipType::Prohibit:return 0;
-		break;
-	case CEquipType::Hat:return 1;
-		break;
-	case CEquipType::Armour:return 2;
-		break;
-	case CEquipType::Shoes:return 3;
-		break;
-	default: {
-		cout << "装备类型错误" << endl;
-		return -1;
-	}break;
-	}
 	return m_unPos;
 }
 long long int CEquipType::GetHp() const {

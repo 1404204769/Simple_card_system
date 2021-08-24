@@ -38,6 +38,9 @@ public:
 
 	bool Delete();/*将Card数据从数据库删除*/
 
+	bool Wear(const long long int i64EquipId,const unsigned int unPos);/*穿戴装备*/
+	bool Drop(const long long int i64EquipId, const unsigned int unPos);/*脱下装备*/
+
 private:
 	bool Update();/*更新数据库*/
 	bool Insert();/*将Card数据插入数据库*/

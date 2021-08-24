@@ -46,7 +46,7 @@ int main() {
 	bool bContinue = true;
 	while (bContinue) {
 		system("cls");
-		cout << "请选择功能:\n1.登入\n2.注销\n\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级\n\n9.给玩家卡牌穿上皮肤\n10.从玩家卡牌脱下皮肤\n11.给玩家增加皮肤\n12.显示玩家拥有的所有皮肤\n\n13.指定玩家指定卡牌升阶" << endl;
+		cout << "请选择功能:\n1.登入\n2.注销\n\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级\n\n9.给玩家卡牌穿上皮肤\n10.从玩家卡牌脱下皮肤\n11.给玩家增加皮肤\n12.显示玩家拥有的所有皮肤\n\n13.指定玩家指定卡牌升阶\n\n14.给玩家卡牌穿上装备\n15.从玩家卡牌脱下装备\n16.给玩家增加装备\n17.显示玩家拥有的所有装备\n" << endl;
 		int nchoice = 1;
 		cin >> nchoice;
 		getchar();
@@ -150,7 +150,7 @@ bool Subject(int nchoice) {
 		cin >> i64CardId;
 		cout << "请输入要穿戴的皮肤的Id" << endl;
 		cin >> i64SkinId;
-		if (!g_CardSystem.Wear(i64UserId, i64CardId, i64SkinId))
+		if (!g_CardSystem.SkinWear(i64UserId, i64CardId, i64SkinId))
 			cout << "皮肤穿戴失败" << endl;
 		else
 			cout << "皮肤穿戴成功" << endl;
@@ -163,7 +163,7 @@ bool Subject(int nchoice) {
 		cin >> i64CardId;
 		cout << "请输入要脱下的皮肤的Id" << endl;
 		cin >> i64SkinId;
-		if (!g_CardSystem.Drop(i64UserId, i64CardId, i64SkinId))
+		if (!g_CardSystem.SkinDrop(i64UserId, i64CardId, i64SkinId))
 			cout << "皮肤脱下失败" << endl;
 		else
 			cout << "皮肤脱下成功" << endl;
@@ -175,7 +175,7 @@ bool Subject(int nchoice) {
 		cin >> i64UserId;
 		cout << "请输入要获取的皮肤的类型" << endl;
 		cin >> unSkinType;
-		if (!g_CardSystem.AddSkin(i64UserId, unSkinType))
+		if (!g_CardSystem.SkinAdd(i64UserId, unSkinType))
 			cout << "皮肤获取失败" << endl;
 		else
 			cout << "皮肤获取成功" << endl;
@@ -184,13 +184,58 @@ bool Subject(int nchoice) {
 		long long int i64UserId;
 		cout << "请输入指定玩家的Id" << endl;
 		cin >> i64UserId;
-		if (!g_CardSystem.ShowSkin(i64UserId))
+		if (!g_CardSystem.SkinShow(i64UserId))
 			cout << "皮肤展示失败" << endl;
 		else
 			cout << "皮肤展示成功" << endl;
 	}break;
 	case 13: {
 		CardRankLevUp();
+	}break;
+	case 14: {
+		long long int i64UserId, i64CardId, i64EquipId;
+		cout << "请输入指定玩家的Id" << endl;
+		cin >> i64UserId;
+		cout << "请输入要穿戴的卡牌的Id" << endl;
+		cin >> i64CardId;
+		cout << "请输入要穿戴的装备的Id" << endl;
+		cin >> i64EquipId;
+		if (!g_CardSystem.EquipWear(i64UserId, i64CardId, i64EquipId))
+			cout << "装备穿戴失败" << endl;
+		else
+			cout << "装备穿戴成功" << endl;
+	}break;
+	case 15: {
+		long long int i64UserId, i64EquipId;
+		cout << "请输入指定玩家的Id" << endl;
+		cin >> i64UserId;
+		cout << "请输入要脱下的装备的Id" << endl;
+		cin >> i64EquipId;
+		if (!g_CardSystem.EquipDrop(i64UserId, i64EquipId))
+			cout << "装备脱下失败" << endl;
+		else
+			cout << "装备脱下成功" << endl;
+	}break;
+	case 16: {
+		long long int i64UserId;
+		unsigned int unEquipType;
+		cout << "请输入指定玩家的Id" << endl;
+		cin >> i64UserId;
+		cout << "请输入要获取的装备的类型" << endl;
+		cin >> unEquipType;
+		if (!g_CardSystem.EquipAdd(i64UserId, unEquipType))
+			cout << "装备获取失败" << endl;
+		else
+			cout << "装备获取成功" << endl;
+	}break;
+	case 17: {
+		long long int i64UserId;
+		cout << "请输入指定玩家的Id" << endl;
+		cin >> i64UserId;
+		if (!g_CardSystem.EquipShow(i64UserId))
+			cout << "装备展示失败" << endl;
+		else
+			cout << "装备展示成功" << endl;
 	}break;
 	default:break;
 	}
