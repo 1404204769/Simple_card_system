@@ -26,24 +26,48 @@ const string strServer("localhost");
 const string strUser("root");
 const string strPassword("root");
 const int nPort = 3306;
-void Init() {
+bool Init() {
 	g_DB.InitConnect(strDB, strServer, strUser, strPassword, nPort);
-	g_CardTypeMgr.Init();
-	g_SkinTypeMgr.Init();
+	if (!g_CardTypeMgr.Init()) {
+		cout << "卡牌类型静态数据加载失败" << endl;
+		return false;
+	}
+	if (!g_SkinTypeMgr.Init()) {
+		cout << "皮肤类型静态数据加载失败" << endl;
+		return false;
+	}
 	g_SkinTypeMgr.PrintAll();
-	g_EquipTypeMgr.Init();
+	if (!g_EquipTypeMgr.Init()) {
+		cout << "装备类型静态数据加载失败" << endl;
+		return false;
+	}
 	g_EquipTypeMgr.PrintAll();
-	g_CardRankTypeMgr.Init();
+	if (!g_CardRankTypeMgr.Init()) {
+		cout << "卡牌阶级静态数据加载失败" << endl;
+		return false;
+	}
 	g_CardRankTypeMgr.Debug_PrintAll();
-	g_CardLevAttrTypeMgr.Init();
+	if (!g_CardLevAttrTypeMgr.Init()) {
+		cout << "卡牌等级静态数据加载失败" << endl;
+		return false;
+	}
 	g_CardLevAttrTypeMgr.Debug_PrintAll();
 	system("pause");
+	return true;
+}
+void Free() {
+	g_UserMgr.Free();
+	g_CardTypeMgr.Free();
+	g_SkinTypeMgr.Free();
+	g_EquipTypeMgr.Free();
+	g_CardRankTypeMgr.Free();
+	g_CardLevAttrTypeMgr.Free();
+
 }
 void CardRankLevUp();/*卡牌升级*/
 bool Subject(int nchoice);
 int main() {
-	Init();
-	bool bContinue = true;
+	bool bContinue = Init();
 	while (bContinue) {
 		system("cls");
 		cout << "请选择功能:\n1.登入\n2.注销\n\n3.指定玩家新增指定类型卡牌\n4.指定玩家删除一张指定卡牌\n5.查询指定玩家的所有卡牌\n6.查询指定玩家指定卡牌的攻击力\n7.显示所有在线玩家信息\n8.指定玩家指定卡牌升级\n\n9.给玩家卡牌穿上皮肤\n10.从玩家卡牌脱下皮肤\n11.给玩家增加皮肤\n12.显示玩家拥有的所有皮肤\n\n13.指定玩家指定卡牌升阶\n\n14.给玩家卡牌穿上装备\n15.从玩家卡牌脱下装备\n16.给玩家增加装备\n17.显示玩家拥有的所有装备\n" << endl;
@@ -53,7 +77,7 @@ int main() {
 		bContinue = Subject(nchoice);
 		system("pause");
 	}
-
+	Free();
 	return 0;
 }
 bool Subject(int nchoice) {

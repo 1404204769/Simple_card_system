@@ -16,8 +16,8 @@ public:
 
 	bool Debug_PrintAll();/*打印显示静态配置*/
 
-private:
 	void Free();/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
+private:
 
 	using CardRankTypeMap = std::map<unsigned int, const CCardRankType*>;
 	using CardRankTypeMapIter = CardRankTypeMap::iterator;

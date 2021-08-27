@@ -6,7 +6,6 @@ CCardLevAttrTypeMgr::CCardLevAttrTypeMgr() {
 }
 CCardLevAttrTypeMgr::~CCardLevAttrTypeMgr() {
 	/*析构函数*/
-	Free();
 	Log("调用了CCardLevAttrTypeMgr析构函数\n");
 }
 const CCardLevAttrType* CCardLevAttrTypeMgr::Get(unsigned int unLev) {

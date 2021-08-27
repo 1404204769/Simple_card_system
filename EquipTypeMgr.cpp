@@ -6,7 +6,6 @@ CEquipTypeMgr::CEquipTypeMgr() {
 }
 CEquipTypeMgr::~CEquipTypeMgr() {
 	/*析构函数*/
-	Free();
 	Log("调用了CEquipTypeMgr析构函数\n");
 }
 

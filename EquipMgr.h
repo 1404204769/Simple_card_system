@@ -23,8 +23,8 @@ public:
 	bool AddNew(const CEquipType* pEquipType);/*增加一张指定类型的装备*/
 	bool DelExist(const long long int i64EquipId);/*删除一张已有的装备*/
 	void PrintAll();/*打印显示拥有的所有装备的数据*/
-	bool Wear(const long long int i64CardId, const long long int i64EquipId);/*指定某张卡牌穿上某个装备*/
-	bool Drop(const long long int i64EquipId);/*指定脱下某个装备*/
+	long long int GetWearCardId(const long long int i64EquipId);/*查询装备被哪张卡牌穿了*/
+
 	bool AddEquipCardMap(const long long int i64EquipId, const long long int i64CardId);/*穿戴标记容器增加操作*/
 	bool DelEquipCardMap(const long long int i64EquipId);/*穿戴标记容器删除操作*/
 private:

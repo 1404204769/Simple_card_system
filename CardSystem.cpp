@@ -199,45 +199,24 @@ bool CCardSystem::ShowCardAtk(const std::string& strUserAccount,const long long 
 	}
 
 	CEquipMgr& EquipMgr = pUser->GetEquipMgr();
-	const long long int i64EquipHat = pCard->GetPosHat();
-	if (i64EquipHat != 0) {
-		CEquip* pEquip = EquipMgr.Get(i64EquipHat);
-		if (!pEquip) {
-			cout << "头部装备无法找到,不计入属性中" << endl;
-		}
-		else {
-			const CEquipType* pEquipHatType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
-			if (pEquipHatType) {
-				Atk += pEquipHatType->GetAtk();
+	CCard::EquipIter iterBegin = pCard->GetEquipIterBegin();
+	CCard::EquipIter iterEnd = pCard->GetEquipIterEnd();
+	unsigned int unPos = 0;
+	while (iterBegin != iterEnd) {
+		const long long int i64EquipId = iterBegin->second;
+		unPos++;
+		if (i64EquipId != 0) {
+			CEquip* pEquip = EquipMgr.Get(i64EquipId);
+			if (pEquip) {
+				const CEquipType* pEquipType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
+				if (!pEquipType) {
+					cout << "装备类型数据发生错误" << endl;
+					continue;
+				}
+				Atk += pEquipType->GetAtk();
 			}
 		}
-	}
-	const long long int i64EquipArmour = pCard->GetPosArmour();
-
-	if (i64EquipArmour != 0) {
-		CEquip* pEquip = EquipMgr.Get(i64EquipArmour);
-		if (!pEquip) {
-			cout << "衣甲部位装备无法找到,不计入属性中" << endl;
-		}
-		else {
-			const CEquipType* pEquipArmourType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
-			if (pEquipArmourType) {
-				Atk += pEquipArmourType->GetAtk();
-			}
-		}
-	}
-	const long long int i64EquipShoes = pCard->GetPosShoes();
-	if (i64EquipShoes != 0) {
-		CEquip* pEquip = EquipMgr.Get(i64EquipShoes);
-		if (!pEquip) {
-			cout << "鞋子部位装备无法找到,不计入属性中" << endl;
-		}
-		else {
-			const CEquipType* pEquipShoesType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
-			if (pEquipShoesType) {
-				Atk += pEquipShoesType->GetAtk();
-			}
-		}
+		iterBegin++;
 	}
 	cout << "指定卡牌攻击力为：" <<Atk<< endl;
 	return true;
@@ -313,9 +292,36 @@ bool CCardSystem::EquipWear(const long long int i64UserId, const long long int i
 		cout << "指定用户未登入，请登入后操作" << endl;
 		return false;
 	}
-
+	/*指定某张卡牌穿上某个装备*/
+	if (i64EquipId <= 0) {
+		cout << "装备ID不合法" << endl;
+		return false;
+	}
 	CEquipMgr& EquipMgr = pUser->GetEquipMgr();
-	return EquipMgr.Wear(i64CardId, i64EquipId);
+	CCardMgr& CardMgr = pUser->GetCardMgr();
+
+	CEquip* pEquip = EquipMgr.Get(i64EquipId);
+	if (!pEquip) {
+		cout << "穿戴失败，该玩家没有这张ID为：" << i64EquipId << " 的装备" << endl;
+		return false;
+	}
+	if (EquipMgr.GetWearCardId(i64EquipId)) {
+		cout << "穿戴失败，此装备已被穿戴" << endl;
+		return false;
+	}
+
+	CCard* pCard = CardMgr.Get(i64CardId);
+	if (!pCard) {
+		cout << "此卡牌不存在" << endl;
+		return false;
+	}
+	const CEquipType* pEquipType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
+	if (!pCard->Wear(i64EquipId, pEquipType)) {
+		//Card将装备位上的数据清零
+		cout << "卡牌上的装备位穿戴失败" << endl;
+		return false;
+	}
+	return EquipMgr.AddEquipCardMap(i64EquipId, i64CardId);
 }
 bool CCardSystem::EquipDrop(const long long int i64UserId, const long long int  i64EquipId) {
 	/*指定用户脱指定装备*/
@@ -324,8 +330,43 @@ bool CCardSystem::EquipDrop(const long long int i64UserId, const long long int  
 		cout << "指定用户未登入，请登入后操作" << endl;
 		return false;
 	}
+
 	CEquipMgr& EquipMgr = pUser->GetEquipMgr();
-	return EquipMgr.Drop(i64EquipId);
+	CCardMgr& CardMgr = pUser->GetCardMgr();
+
+	if (i64EquipId <= 0) {
+		cout << "皮肤ID不合法" << endl;
+		return false;
+	}
+	CEquip* pEquip = EquipMgr.Get(i64EquipId);
+	if (!pEquip) {
+		cout << "脱下失败，该玩家没有这张ID为：" << i64EquipId << " 的装备" << endl;
+		return false;
+	}
+
+	const long long int i64CardId = EquipMgr.GetWearCardId(i64EquipId);
+	if (i64CardId==0) {
+		cout << "此装备还未被穿戴" << endl;
+		return false;
+	}
+
+	CCard* pCard = CardMgr.Get(i64CardId);
+	if (!pCard) {
+		cout << "此卡牌不存在" << endl;
+		return false;
+	}
+
+	const CEquipType* pEquipType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
+	if (!pEquipType) {
+		cout << "装备类型静态配置错误" << endl;
+		return false;
+	}
+	const unsigned int unPos = pEquipType->GetPos();
+	if (!pCard->Drop(unPos)) {
+		//Card将装备位上的数据清零
+		cout << "卡牌上的装备位脱下失败" << endl;
+	}
+	return EquipMgr.DelEquipCardMap(i64EquipId);    
 }
 bool CCardSystem::EquipAdd(const long long int i64UserId, const unsigned int unEquipType) {
 	/*指定用户获得指定类型装备*/

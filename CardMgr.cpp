@@ -1,6 +1,7 @@
 #include "CardMgr.h"
 #include "EquipMgr.h"
 #include "User.h"
+#include<array>
 using namespace std;
 CCardMgr::CCardMgr() {
 	/*构造函数*/
@@ -20,14 +21,14 @@ bool CCardMgr::Init(CUser* pUser) {
 	{
 		if (!pUser) 
 		{
-			cout << "构造卡牌管理器时发现用户不存在" << endl;
+			Log("构造卡牌管理器时发现用户不存在\n");
 			return false;
 		}
 
 		m_pUser = pUser;
 		CEquipMgr& EquipMgr = m_pUser->GetEquipMgr();
 		if (!EquipMgr.IsInit()) {
-			cout << "装备管理器还未初始化" << endl;
+			Log("装备管理器还未初始化\n");
 			return false;
 		}
 		mysqlpp::Row row;
@@ -59,32 +60,7 @@ bool CCardMgr::Init(CUser* pUser) {
 			}
 			const CCardType* pCardType = g_CardTypeMgr.Get(row["card_type"]);
 			if (!pCardType) {
-				cout << "用户所持有的卡牌类型非法,不予显示" << endl;
-				continue;
-			}
-
-			bool bRollBack = false;
-			const long long int i64CardId = row["id"];
-			const long long int i64EquipPosHat = row["equip_pos_hat"];
-			const long long int i64EquipPosArmour = row["equip_pos_armour"];
-			const long long int i64EquipPosShoes = row["equip_pos_shoes"];
-			if (i64EquipPosHat != 0 &&!EquipMgr.AddEquipCardMap(i64EquipPosHat, i64CardId)) {
-				bRollBack = true;
-			}
-			if (i64EquipPosArmour != 0 && !EquipMgr.AddEquipCardMap(i64EquipPosArmour, i64CardId)) {
-				bRollBack = true;
-			}
-			if (i64EquipPosShoes != 0 && !EquipMgr.AddEquipCardMap(i64EquipPosShoes, i64CardId)) {
-				bRollBack = true;
-			}
-			if (bRollBack) {
-				cout << "装备穿戴初始化失败" << endl;
-				if(i64EquipPosHat!=0)
-					EquipMgr.DelEquipCardMap(i64EquipPosHat);
-				if(i64EquipPosArmour!=0)
-					EquipMgr.DelEquipCardMap(i64EquipPosArmour);
-				if(i64EquipPosShoes!=0)
-					EquipMgr.DelEquipCardMap(i64EquipPosShoes);
+				Log("用户所持有的卡牌类型非法,不予显示\n");
 				continue;
 			}
 
@@ -92,6 +68,25 @@ bool CCardMgr::Init(CUser* pUser) {
 				Log("CCardMgr::Init()  卡牌类型初始化失败\n");//打印在控制台
 				return false;
 			}
+
+			const long long int i64CardId = row["id"];
+			long long int  i64EquipId;
+			string stdPos="";
+			for (int i = 1; i <= CCard::EquipPosMax; i++) {
+				pCard->GetFieldNamePos(stdPos,i);
+				i64EquipId = row[stdPos.c_str()];
+				if (i64EquipId == 0)
+					continue;
+				if (EquipMgr.GetWearCardId(i64EquipId)==0) {
+					//此装备未被其他装备穿戴
+					EquipMgr.AddEquipCardMap(i64EquipId, i64CardId);
+				}
+				else {
+					pCard->Drop(i);//将对应装备位上的装备脱下防止与其他卡牌冲突
+				}
+
+			}
+
 			const long long int i64CardInt = pCard->GetCardId();
 			m_mapByCardId.insert({ i64CardInt,pCard.release() });
 		}
@@ -138,20 +133,25 @@ void CCardMgr::PrintAll() {
 		return;
 	}
 	CSkinMgr& SkinMgr = m_pUser->GetSkinMgr();
+
 	for(auto &iter:m_mapByCardId) {
+
 		CCard* pCard = iter.second;
 		if (!pCard) {
 			continue;
 		}
-		const long long int i64CardId = pCard->GetCardId();
-		CSkin* pSkin = SkinMgr.GetWearing(i64CardId);
+
 		const CCardType& CardType = pCard->GetCardTypeData();
 		const CCardLevAttrType& CardLevAttrType = pCard->GetCardLevAttrTypeData();
 		const CCardRankType& CardRankType = pCard->GetCardRankTypeData();
+		long long int i64Hp = CardType.GetHp() + CardLevAttrType.GetHp() + CardRankType.GetHp();
+		long long int i64Mp = CardType.GetMp() + CardLevAttrType.GetMp() + CardRankType.GetMp();
+		long long int i64Atk = CardType.GetAtk() + CardLevAttrType.GetAtk() + CardRankType.GetAtk();
 
-		long long int i64Hp = 0, i64Mp = 0, i64Atk = 0;
-		string strSkinName = "无\t";
-		string strEquipHatName = "无\t", strEquipArmourName = "无\t", strEquipShoesName = "无\t";
+		const long long int i64CardId = pCard->GetCardId();
+
+		string strSkinName = "无";
+		CSkin* pSkin = SkinMgr.GetWearing(i64CardId);
 		if (pSkin) {
 			unsigned int SkinType = pSkin->GetSkinType();
 			const CSkinType* pSkinType = g_SkinTypeMgr.Get(SkinType);
@@ -165,77 +165,39 @@ void CCardMgr::PrintAll() {
 			strSkinName = pSkinType->GetName();
 		}
 
-		CEquipMgr &EquipMgr = m_pUser->GetEquipMgr();
-		const long long int i64EquipHat = pCard->GetPosHat();
-		if (i64EquipHat != 0) {
-			CEquip* pEquip = EquipMgr.Get(i64EquipHat);
-			if (!pEquip) {
-				cout << "头部装备无法找到,不计入属性中" << endl;
-			}
-			else {
-				const CEquipType* pEquipHatType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
-				if (!pEquipHatType) {
-					cout << "头部装备类型数据发生错误" << endl;
-					continue;
-				}
-				i64Hp += pEquipHatType->GetHp();
-				i64Mp += pEquipHatType->GetMp();
-				i64Atk += pEquipHatType->GetAtk();
-				strEquipHatName = pEquipHatType->GetName();
-			}
+		array<string, CCard::EquipPosMax> strszEquipName;
+		strszEquipName.fill("无");
+		CEquipMgr& EquipMgr = m_pUser->GetEquipMgr();
+		unsigned int unPos=0;
+		for (CCard::EquipIter iterBegin = pCard->GetEquipIterBegin(), iterEnd = pCard->GetEquipIterEnd(); iterBegin != iterEnd; iterBegin++,unPos++) {
+			const long long int i64EquipId = iterBegin->second;
+			if (i64EquipId == 0)
+				continue;
+			CEquip* pEquip = EquipMgr.Get(i64EquipId);
+			if (!pEquip)
+				continue;
+			const CEquipType* pEquipType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
+			if (!pEquipType)
+				continue;
+			i64Hp += pEquipType->GetHp();
+			i64Mp += pEquipType->GetMp();
+			i64Atk += pEquipType->GetAtk();
+			strszEquipName[unPos] = pEquipType->GetName();
 		}
-
-		const long long int i64EquipArmour = pCard->GetPosArmour();
-		if (i64EquipArmour != 0) {
-			CEquip* pEquip = EquipMgr.Get(i64EquipArmour);
-			if (!pEquip) {
-				cout << "衣甲部位装备无法找到,不计入属性中" << endl;
-			}
-			else {
-				const CEquipType* pEquipArmourType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
-				if (!pEquipArmourType) {
-					cout << "衣甲部位装备类型数据发生错误" << endl;
-					continue;
-				}
-				i64Hp += pEquipArmourType->GetHp();
-				i64Mp += pEquipArmourType->GetMp();
-				i64Atk += pEquipArmourType->GetAtk();
-				strEquipArmourName = pEquipArmourType->GetName();
-			}
-		}
-
-		const long long int i64EquipShoes = pCard->GetPosShoes();
-		if (i64EquipShoes != 0) {
-			CEquip* pEquip = EquipMgr.Get(i64EquipShoes);
-			if (!pEquip) {
-				cout << "鞋子部位装备无法找到,不计入属性中" << endl;
-			}
-			else {
-				const CEquipType* pEquipShoesType = g_EquipTypeMgr.Get(pEquip->GetEquipType());
-				if (!pEquipShoesType) {
-					cout << "鞋子部位装备类型数据发生错误" << endl;
-					continue;
-				}
-				i64Hp += pEquipShoesType->GetHp();
-				i64Mp += pEquipShoesType->GetMp();
-				i64Atk += pEquipShoesType->GetAtk();
-				strEquipShoesName = pEquipShoesType->GetName();
-			}
-		}
-
-		i64Hp += CardType.GetHp() + CardLevAttrType.GetHp()+ CardRankType.GetHp();
-		i64Mp += CardType.GetMp() + CardLevAttrType.GetMp()+ CardRankType.GetMp();
-		i64Atk += CardType.GetAtk() + CardLevAttrType.GetAtk()+CardRankType.GetAtk();
-		cout << "CardID:" << i64CardId << "\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName() 
-			<< "\tLev:" << pCard->GetLev() << "\tRank_Lev:" << pCard->GetCardRankLev() << "\tExp:" << pCard->GetExp()
-			<< "\n\tSkin:" << strSkinName << "\t头部装备:"<< strEquipHatName << "\t衣甲装备:" << strEquipArmourName << "\t鞋子装备:" << strEquipShoesName
-			<<"\n\tHp:" << i64Hp << "\tMp:" << i64Mp << "\tAtk:" << i64Atk << endl;
+		
+		cout << "CardID:" << i64CardId 
+			<< "\n\tUserId:" << pCard->GetUserId() << "\tName:" << pCard->GetName()<< "\tLev:" << pCard->GetLev() 
+			<< "\tRank_Lev:" << pCard->GetCardRankLev() << "\tExp:" << pCard->GetExp()
+			<<"\tHp:" << i64Hp << "\tMp:" << i64Mp << "\tAtk:" << i64Atk
+			<< "\n\tSkin:" << strSkinName;
+		for (int i = 0; i < CCard::EquipPosMax; i++) {
+			cout << "\t装备" << i + 1 << ": " << strszEquipName.at(i);
+		}cout << endl;
 	}
 }
 bool CCardMgr::Add(const CCardType* pCardType) {
 	/*增加一张指定类型的卡牌*/
-	if (!m_pUser) 
-	{
+	if (!m_pUser) {
 		cout << "此卡牌管理器与用户失联了" << endl;
 		return false;
 	}
@@ -250,26 +212,25 @@ bool CCardMgr::Add(const CCardType* pCardType) {
 		cout << "Card实体化失败" << endl;
 		return false;
 	}
+
 	const long long int i64UserId = m_pUser->GetId();
 	if (!pCard->CreateNewCard(i64UserId,pCardType)) {
 		cout << "卡牌数据初始化失败，增加卡牌失败" << endl;
 		return false;
 	}
+
 	const long long int i64CardId = pCard->GetCardId();
 	m_mapByCardId.insert({ i64CardId, pCard.release() });
 	return true;
 }
 bool CCardMgr::Del(long long int i64CardId) {
 	/*根据玩家卡牌名称来删除数据*/
-	if (i64CardId <= 0) {
-		cout << "卡牌ID不合法" << endl;
+	if (!m_pUser) {
+		cout << "卡牌管理器与用户失联了" << endl;
 		return false;
 	}
 
-	CCard* pCard = nullptr;
-	if(m_mapByCardId.count(i64CardId))
-		pCard=m_mapByCardId[i64CardId];
-
+	unique_ptr<CCard> pCard(Get(i64CardId));
 	if (!pCard) {
 		cout << "删除失败，该玩家没有这张叫做（"<< i64CardId <<"）的卡牌" << endl;
 		return false;
@@ -282,37 +243,60 @@ bool CCardMgr::Del(long long int i64CardId) {
 		SkinMgr.Drop(i64CardId, i64SkinId);
 	}
 
-	m_mapByCardId.erase(i64CardId);
-	if(!pCard->Delete())
-	{
-		delete pCard;
-		return false;
+	CEquipMgr& EquipMgr = m_pUser->GetEquipMgr();
+	for (CCard::EquipIter iterBegin = pCard->GetEquipIterBegin(), iterEnd = pCard->GetEquipIterEnd(); iterBegin != iterEnd; iterBegin++) {
+		const long long int i64EquipId = iterBegin->second;
+		if (i64EquipId == 0)//装备位上无装备卡牌
+			continue;
+
+		CEquip* pEquip = EquipMgr.Get(i64EquipId);
+		if (!pEquip)//装备卡牌不存在
+			continue;
+
+		EquipMgr.DelEquipCardMap(i64EquipId);//脱下装备卡牌
 	}
-	delete pCard;
-	return true;
+
+	m_mapByCardId.erase(i64CardId);
+	return pCard->Delete();
 }
 bool CCardMgr::DelAll() {
 	/*删除所有的卡牌*/
+	if (!m_pUser) {
+		cout << "卡牌管理器与用户失联了" << endl;
+		return false;
+	}
 	bool ret = true;
+	CSkinMgr& SkinMgr = m_pUser->GetSkinMgr();
 	for (auto &iter:m_mapByCardId) {
-		CCard* pCard = iter.second;
+		unique_ptr<CCard> pCard(iter.second);
 		if (!pCard) {
 			ret = false;
 			continue;
 		}	
 		const long long int i64CardId = pCard->GetCardId();
-		CSkinMgr& SkinMgr = m_pUser->GetSkinMgr();
 		CSkin* pSkin = SkinMgr.GetWearing(i64CardId);
 		const long long int i64SkinId = pSkin->GetSkinId();
 		if (pSkin) {
 			SkinMgr.Drop(i64CardId, i64SkinId);
 		}
 
+		CEquipMgr& EquipMgr = m_pUser->GetEquipMgr();
+		for (CCard::EquipIter iterBegin = pCard->GetEquipIterBegin(), iterEnd = pCard->GetEquipIterEnd(); iterBegin != iterEnd; iterBegin++) {
+			const long long int i64EquipId = iterBegin->second;
+			if (i64EquipId == 0)//装备位上无装备卡牌
+				continue;
+
+			CEquip* pEquip = EquipMgr.Get(i64EquipId);
+			if (!pEquip)//装备卡牌不存在
+				continue;
+
+			EquipMgr.DelEquipCardMap(i64EquipId);//脱下装备卡牌
+		}
+
 		if (!pCard->Delete()) {
 			cout << "卡牌删除失败" << endl;
 			ret = false;
 		}
-		delete pCard;
 	}
 	m_mapByCardId.clear();
 	return ret;

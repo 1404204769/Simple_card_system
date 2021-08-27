@@ -6,7 +6,6 @@ CSkinTypeMgr::CSkinTypeMgr() {
 }
 CSkinTypeMgr::~CSkinTypeMgr() {
 	/*析构函数*/
-	Free();
 	Log("调用了CSkinTypeMgr析构函数\n");
 }
 const CSkinType* CSkinTypeMgr::Get(unsigned int unId) {

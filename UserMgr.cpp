@@ -5,42 +5,39 @@ using namespace std;
 using namespace mysqlpp;
 CUserMgr::CUserMgr() {
 	Log("调用了CUserMgr的构造函数\n");
-
-	m_mapById.clear();
 	m_mapByAccount.clear();
+	m_mapById.clear();
 }
 CUserMgr::~CUserMgr() {
 	Log("调用了CUserMgr的析构函数\n");
-
-	Free();
 }
 
 bool CUserMgr::Add(const string& stdAccount) {
 	long long int i64Id = g_UserMgr.GetOnlineId(stdAccount);
 	if (i64Id != 0) {
-		cout << "该用户已登入！" << endl;
+		Log("该用户已登入！\n");
 		return false;
 	}
 
 	mysqlpp::Row row;
 	if (!g_UserMgr.CheckExistInDB(row, stdAccount)) {/*检查是否在数据库中存在，不存在则新建一个*/
-		cout << "用户数据在数据库发生错误" << endl;
+		Log( "用户数据在数据库发生错误\n" );
 		return false;
 	}
 
 	unique_ptr<CUser> pUser(new CUser(""));
 	if (!pUser) {
-		cout << "创建用户实体失败" << endl;
+		Log( "创建用户实体失败\n" );
 		return false;
 	}
 
 	if (!row) {
-		cout << "错误：没有获取到数据库中的数据返回的Row" << endl;
+		Log("错误：没有获取到数据库中的数据返回的Row\n");
 		return false;
 	}
 
 	if (!pUser->Init(row)) {
-		cout << "用户初始化失败" << endl;
+		Log("用户初始化失败\n");
 		return false;
 	}
 
@@ -49,8 +46,8 @@ bool CUserMgr::Add(const string& stdAccount) {
 	m_mapByAccount[strAccount] = i64Id;
 	m_mapById[i64Id] = pUser.release();
 
-	if (m_mapByAccount.count(strAccount) == 0 || m_mapById.count(i64Id) == 0) {
-		cout << "用户登入未生效" << endl;
+	if (m_mapByAccount[strAccount] == 0 || m_mapById[i64Id] == 0) {
+		Log("用户登入未生效\n");
 		Del(strAccount);
 		return false;
 	}
@@ -60,7 +57,7 @@ bool CUserMgr::Del(const string& _strAccount) {
 	/*根据Account删除对应的User*/
 	UserAccountMapIter iterByAccount = m_mapByAccount.find(_strAccount);
 	if (iterByAccount == m_mapByAccount.end()) {
-		cout << "用户不在线 Account:" << _strAccount << endl;
+		Log("用户不在线 Account:"+ _strAccount+"\n");
 		return false;
 	}
 	long long int i64Id = iterByAccount->second;
@@ -68,7 +65,7 @@ bool CUserMgr::Del(const string& _strAccount) {
 
 	UserIdMapIter iterById = m_mapById.find(i64Id);
 	if (iterById == m_mapById.end()) {
-		cout << "用户不在线 ID:" << iterByAccount->second << endl;
+		Log( "用户不在线 ID:" +to_string( iterByAccount->second )+"\n");
 		return false;
 	}
 	delete iterById->second;
@@ -93,7 +90,7 @@ CUser* CUserMgr::Get(const long long int _i64Id) {
 	/*从map里面查询，返回查询对象指针*/
 	UserIdMapIter iterById = m_mapById.find(_i64Id);
 	if (iterById == m_mapById.end()) {
-		cout << "Do not Find ID:" << _i64Id << endl;
+		Log("Do not Find ID:" + to_string( _i64Id )+"\n");
 		return nullptr;
 	}
 	assert(iterById->second);
@@ -126,10 +123,10 @@ void CUserMgr::PrintOnline() {
 
 void CUserMgr::Free() {
 	/*在析构函数中调用，释放还在内存中的数据，防止内存泄漏以及数据丢失*/
+	m_mapByAccount.clear();
 	for (auto &iter:m_mapById) {
 		delete iter.second;//先释放内存
 	}
-	m_mapByAccount.clear();
 	m_mapById.clear();
 }
 bool CUserMgr::SearchDB(mysqlpp::Row& row, const std::string& _strAccount) {

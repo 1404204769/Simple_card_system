@@ -6,7 +6,6 @@ CCardRankTypeMgr::CCardRankTypeMgr() {
 }
 CCardRankTypeMgr::~CCardRankTypeMgr() {
 	/*析构函数*/
-	Free();
 	Log("调用了CCardRankTypeMgr析构函数\n");
 }
 const CCardRankType* CCardRankTypeMgr::Get(const unsigned int unId) {

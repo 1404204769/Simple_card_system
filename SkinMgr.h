@@ -34,6 +34,7 @@ private:
 
 	CUser* m_pUser = nullptr;
 	using SkinTypeSet = std::set<unsigned int>;
+	using SkinTypeSetIter = SkinTypeSet::iterator;
 	SkinTypeSet m_setBySkinType;
 
 	using CardSkinMap = std::map<long long int, CSkin*>;

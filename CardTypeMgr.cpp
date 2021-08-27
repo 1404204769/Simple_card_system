@@ -6,7 +6,6 @@ CCardTypeMgr::CCardTypeMgr() {
 }
 CCardTypeMgr::~CCardTypeMgr() {
 	/*析构函数*/
-	Free();
 	Log("调用了CCardTypeMgr析构函数\n");
 }
 const CCardType* CCardTypeMgr::Get(unsigned int _unType) {

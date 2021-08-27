@@ -1,4 +1,5 @@
 #include "Card.h"
+#include"Equip.h"
 using namespace std;
 CCard::CCard() {
 	/*构造函数*/
@@ -18,31 +19,32 @@ bool CCard::CreateNewCard(const long long int i64UserId, const CCardType* pCardT
 	/*构造一个新的卡牌*/
 	if (!pCardType)
 	{
-		cout << "卡牌类型无效，新建卡牌失败" << endl;
+		Log("卡牌类型无效，新建卡牌失败\n");
 		return false;
 	}
 
 	if (i64UserId<=0) {
-		cout << "用户ID不合法" << endl;
+		Log("用户ID不合法\n");
 		return false;
 	}
-
 	if (!SetLevel(1)) {/*初始等级为0*/
-		cout << "卡牌等级无效" << endl;
+		Log("卡牌等级无效\n");
 		return false;
 	}
 	if (!SetRank(0)) {
 		/*初始阶级为0*/
-		cout << "卡牌阶级无效" << endl;
+		Log("卡牌阶级无效\n");
 		return false;
 	}
 	m_i64UserId = i64UserId;
 	m_unCardType = pCardType->GetCardType();
 	m_strName = pCardType->GetName();
 	m_pCardType = pCardType;
-
+	for (int i = 1; i <= EquipPosMax; i++) {
+		m_mapEquipPos[i] = 0;
+	}
 	if (!Insert()) {
-		cout << "新卡牌插入数据库失败" << endl;
+		Log("新卡牌插入数据库失败\n");
 		return false;
 	}
 	return true;
@@ -59,23 +61,23 @@ bool CCard::CreateFromDB(const mysqlpp::Row& row, const CCardType* pCardType) {
 
 		if (!pCardType)
 		{
-			cout << "卡牌类型无效，新建卡牌失败" << endl;
+			Log("卡牌类型无效，新建卡牌失败\n");
 			return false;
 		}
 
 		m_unCardType = row["card_type"];
 		if (m_unCardType != pCardType->GetCardType())
 		{
-			cout << "卡牌类型不匹配，新建卡牌失败" << endl;
+			Log("卡牌类型不匹配，新建卡牌失败\n");
 			return false;
 		}
 
 		if (!SetLevel(row["lev"])) {
-			cout << "卡牌等级无效" << endl;
+			Log("卡牌等级无效\n");
 			return false;
 		}
 		if (!SetRank(row["rank_lev"])) {
-			cout << "卡牌阶级无效" << endl;
+			Log("卡牌阶级无效\n");
 			return false;
 		}
 		m_i64CardId = row["id"];
@@ -83,10 +85,11 @@ bool CCard::CreateFromDB(const mysqlpp::Row& row, const CCardType* pCardType) {
 		m_strName = row["name"];
 		m_i64Exp = row["exp"];
 		m_pCardType = pCardType;
-
-		m_i64EquipPosHat = row["equip_pos_hat"];
-		m_i64EquipPosArmour = row["equip_pos_armour"];
-		m_i64EquipPosShoes = row["equip_pos_shoes"];
+		string strPos = "";
+		for (int i = 1; i <= EquipPosMax; i++) {
+			GetFieldNamePos(strPos,i);
+			m_mapEquipPos[i] = row[strPos.c_str()];
+		}
 	}
 	catch (const mysqlpp::BadQuery& er) {
 		Log("CCard::CreateFromDB()  Query error: " + string(er.what()) + "\n");
@@ -107,6 +110,12 @@ bool CCard::CreateFromDB(const mysqlpp::Row& row, const CCardType* pCardType) {
 	return true;
 }
 
+void CCard::GetFieldNamePos(string & strFieldName_Out,const unsigned int unPos) {
+	/*获取对应数据库中的数据位字段名*/
+	string strEquip = "equip_pos_";
+	strFieldName_Out = strEquip +to_string(unPos);
+	return ;
+}
 const std::string& CCard::GetName() const{
 	/*获取m_strName*/
 	return m_strName;
@@ -136,18 +145,25 @@ long long int CCard::GetExp() const{
 	return m_i64Exp;
 }
 
-long long int CCard::GetPosHat()const {
-	/*获取m_i64EquipPosHat*/
-	return m_i64EquipPosHat;
+long long int CCard::GetEquipPos(const unsigned int unPos) {
+	/*获取指定位置上的装备*/
+	EquipIter iter = m_mapEquipPos.find(unPos);
+	if (iter==m_mapEquipPos.end()) {
+		Log("此装备没有装备位："+to_string(unPos)+"\n");
+		return 0;
+	}
+	return iter->second;
 }
-long long int CCard::GetPosArmour()const {
-	/*获取m_i64PosArmour*/
-	return m_i64EquipPosArmour;
+
+CCard::EquipIter CCard::GetEquipIterBegin() {
+	/*获得装备迭代器起点*/
+	return m_mapEquipPos.cbegin();
 }
-long long int CCard::GetPosShoes()const {
-	/*获取m_i64PosShoes*/
-	return m_i64EquipPosShoes;
+CCard::EquipIter CCard::GetEquipIterEnd() {
+	/*获得装备迭代器终点*/
+	return m_mapEquipPos.cend();
 }
+
 const CCardType& CCard::GetCardTypeData() const{
 	/*获取对应的卡牌类型详细数据*/
 	assert(m_pCardType);
@@ -175,65 +191,36 @@ bool CCard::RankUp() {
 }
 
 
-bool CCard::Wear(const long long int i64EquipId, const unsigned int unPos) {
+bool CCard::Wear(const long long int i64EquipId, const CEquipType* pEquipType) {
 	/*穿戴装备*/
-	switch (unPos)
-	{
-	case 1: {
-		if (GetPosHat() != 0) {
-			cout << "此卡牌（ID：" << GetCardId() << "）在头部已有装备（ID：" << GetPosHat() << "）了" << endl;
-			return false;
-		}
-		return SetPosHat(i64EquipId);
-	}break;
-	case 2: {
-		if (GetPosArmour() != 0) {
-			cout << "此卡牌（ID：" << GetCardId() << "）在衣甲部位已有装备（ID：" << GetPosArmour() << "）了" << endl;
-			return false;
-		}
-		return SetPosArmour(i64EquipId);
-	}break;
-	case 3: {
-		if (GetPosShoes() != 0) {
-			cout << "此卡牌（ID：" << GetCardId() << "）在鞋子部位已有装备（ID：" << GetPosShoes() << "）了" << endl;
-			return false;
-		}
-		return SetPosShoes(i64EquipId);
-	}break;
-	default:
-		break;
+	if (!pEquipType) {
+		Log("传入的装备位类型是空指针\n");
+		return false;
 	}
-	return true;
+	const unsigned int unPos = pEquipType->GetPos();
+	EquipIter iter = m_mapEquipPos.find(unPos);
+	if (iter==m_mapEquipPos.end()) {
+		Log("此装备没有装备位："+to_string(unPos)+"\n");
+		return false;
+	}
+	if (iter->second!=0) {
+		Log("此装备位已有装备(ID:"+to_string(iter->second)+")\n");
+		return false;
+	}
+	return SetEquip(i64EquipId, unPos);
 }
-bool CCard::Drop(const long long int i64EquipId, const unsigned int unPos) {
+bool CCard::Drop(const unsigned int unPos) {
 	/*脱下装备*/
-	switch (unPos)
-	{
-	case 1: {
-		if (GetPosHat() == 0) {
-			cout << "此卡牌（ID：" << GetCardId() << "）在头部还未有装备" << endl;
-			return false;
-		}
-		return SetPosHat(0);
-	}break;
-	case 2: {
-		if (GetPosArmour() == 0) {
-			cout << "此卡牌（ID：" << GetCardId() << "）在衣甲部位还未有装备" << endl;
-			return false;
-		}
-		return SetPosArmour(0);
-	}break;
-	case 3: {
-		if (GetPosShoes() == 0) {
-			cout << "此卡牌（ID：" << GetCardId() << "）在鞋子部位还未有装备" << endl;
-			return false;
-		}
-		return SetPosShoes(0);
-	}break;
-	default:
-		break;
+	EquipIter iter = m_mapEquipPos.find(unPos);
+	if (iter==m_mapEquipPos.end()) {
+		Log("此卡牌装备位不合法\n");
+		return false;
 	}
-	return true;
+	if (iter->second == 0) {
+		Log("此装备位未有装备\n");
+		return false;
+	}
+	return SetEquip(0, unPos);
 }
 
 
@@ -244,7 +231,7 @@ bool CCard::SetLevel(unsigned int unLev) {
 
 	const CCardLevAttrType* pCardLevAttrType = g_CardLevAttrTypeMgr.Get(unLev);
 	if (!pCardLevAttrType) {
-		cout << "卡牌等级超出限制" << endl;
+		Log("卡牌等级超出限制\n");
 		return false;
 	}
 
@@ -259,7 +246,7 @@ bool CCard::SetRank(unsigned int unRank) {
 
 	const CCardRankType* pCardRankType = g_CardRankTypeMgr.Get(unRank);
 	if (!pCardRankType) {
-		cout << "卡牌阶级超出限制" << endl;
+		Log("卡牌阶级超出限制\n");
 		return false;
 	}
 
@@ -268,23 +255,9 @@ bool CCard::SetRank(unsigned int unRank) {
 	return true;
 }
 
-bool CCard::SetPosHat(long long int i64EquipId) {
-	/*设置头部装备对应装备ID*/
-	////!!!!!!需要先加载装备管理器，查询此装备是否存在
-	m_i64EquipPosHat = i64EquipId;
-	return true;
-
-}
-bool CCard::SetPosArmour(long long int i64EquipId) {
-	/*设置衣甲装备对应装备ID*/
-	////!!!!!!需要先加载装备管理器，查询此装备是否存在
-	m_i64EquipPosArmour = i64EquipId;
-	return true;
-}
-bool CCard::SetPosShoes(long long int i64EquipId) {
-	/*设置鞋子装备对应装备ID*/
-	////!!!!!!需要先加载装备管理器，查询此装备是否存在
-	m_i64EquipPosShoes = i64EquipId;
+bool CCard::SetEquip(const long long int i64EquipId,const unsigned int unPos) {
+	/*设置装备位*/
+	m_mapEquipPos[unPos]= i64EquipId;
 	return true;
 }
 /*
@@ -387,16 +360,18 @@ bool CCard::Update() {
 			return false;
 		}
 
-		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev,rank_lev=%4q:rank_lev,equip_pos_hat=%5q:pos_hat,equip_pos_armour=%6q:pos_armour,equip_pos_shoes=%7q:pos_shoes where id = %8q:CardId;";
+		*pQuery << "update `d_card` set user_id=%0q:UserId,`name`=%1q:Name,exp=%2q:Exp,lev=%3q:Lev,rank_lev=%4q:rank_lev,equip_pos_1=%5q:equip_pos_1,equip_pos_2=%6q:equip_pos_2,equip_pos_3=%7q:equip_pos_3 where id = %8q:CardId;";
 		pQuery->parse();
 		pQuery->template_defaults["UserId"] = m_i64UserId;
 		pQuery->template_defaults["Name"] = m_strName.c_str();
 		pQuery->template_defaults["Exp"] = m_i64Exp;
 		pQuery->template_defaults["Lev"] = m_unLev;
 		pQuery->template_defaults["rank_lev"] = m_unRankLev;
-		pQuery->template_defaults["pos_hat"] = m_i64EquipPosHat;
-		pQuery->template_defaults["pos_armour"] = m_i64EquipPosArmour;
-		pQuery->template_defaults["pos_shoes"] = m_i64EquipPosShoes;
+		string StrPos = "";
+		for (int i = 1; i <= EquipPosMax; i++) {
+			GetFieldNamePos(StrPos,i);
+			pQuery->template_defaults[StrPos.c_str()] = m_mapEquipPos[i];
+		}
 		pQuery->template_defaults["CardId"] = m_i64CardId;
 
 		Log("Query:" + pQuery->str() + "\n");
